@@ -12,7 +12,7 @@ function SamplePage({ page }: { page: number }) {
     <div className="mt-2 border-t border-slate-200 pt-2 text-center text-[7px] text-slate-400">Preview copy • Protected PDF</div>
   </div>;
 }
-export default function Preview({p,cat,url,owned,onClose,onBuy,onAdd}:{p:Product;cat?:string;url:string;owned:boolean;onClose:()=>void;onBuy:()=>void;onAdd:()=>void}) {
+export default function Preview({p,cat,url,owned,onClose,onBuy,onAdd,onDownload}:{p:Product;cat?:string;url:string;owned:boolean;onClose:()=>void;onBuy:()=>void;onAdd:()=>void;onDownload?:()=>void}) {
   const [flipped,setFlipped]=useState(false);
   return <div className="preview-overlay fixed inset-0 z-[80] flex items-center justify-center overflow-y-auto bg-[#030816]/85 p-2 backdrop-blur-md sm:p-4" onClick={onClose}>
     <div className="preview-modal card mx-auto my-auto w-full max-w-[560px] overflow-hidden bg-navy p-4 shadow-2xl sm:p-[18px]" onClick={e=>e.stopPropagation()}>
@@ -28,7 +28,7 @@ export default function Preview({p,cat,url,owned,onClose,onBuy,onAdd}:{p:Product
       <div className="flex items-center justify-center gap-4"><button className="btn-blue !px-3 !py-2 text-xs" onClick={()=>setFlipped(false)} disabled={!flipped}>‹ Prev</button><span className="text-xs font-semibold text-white/75">Page {flipped?'2':'1'} / 2</span><button className="btn-blue !px-3 !py-2 text-xs" onClick={()=>setFlipped(true)} disabled={flipped}>Next ›</button></div>
       {!url&&<p className="mt-2 text-center text-[10px] text-white/45">এটি নমুনা Preview। আসল PDF-এর প্রথম দুই পৃষ্ঠা দেখাতে Admin Panel থেকে ২-পৃষ্ঠার Preview PDF আপলোড করুন।</p>}
       <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-white/10 pt-3"><b className="text-2xl font-black text-gold">₹{p.selling_price}</b>{p.original_price>p.selling_price&&<s className="text-sm text-white/45">₹{p.original_price}</s>}{p.original_price>p.selling_price&&<span className="rounded-md bg-gold px-2 py-0.5 text-[10px] font-extrabold text-navy">{Math.round((1-p.selling_price/p.original_price)*100)}% OFF</span>}<span className="ml-auto text-[11px] text-[#8be0a4]">Save ₹{Math.max(0,p.original_price-p.selling_price)}</span></div>
-      <div className="mt-3 grid grid-cols-2 gap-3"><button onClick={onBuy} className="btn-gold">{owned?'Already Purchased':'BUY NOW'}</button><button onClick={onAdd} className="btn-blue"><ShoppingCart className="mr-1 inline h-4 w-4"/> ADD TO CART</button></div>
+      <div className="mt-3 grid grid-cols-2 gap-3"><button onClick={owned?onDownload:onBuy} className="btn-gold">{owned?'DOWNLOAD PDF':'BUY NOW'}</button><button onClick={onAdd} className="btn-blue"><ShoppingCart className="mr-1 inline h-4 w-4"/> ADD TO CART</button></div>
       <p className="mt-3 text-[11px] leading-5 text-white/50"><ShieldCheck className="mr-1 inline h-4 w-4 text-gold"/><LockKeyhole className="mr-1 inline h-4 w-4 text-gold"/> Admin payment approval-এর পরই সম্পূর্ণ PDF Download করা যাবে।</p>
     </div>
   </div>;

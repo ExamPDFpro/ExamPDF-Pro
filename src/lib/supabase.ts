@@ -44,3 +44,9 @@ export const supabase:any = isSupabaseConfigured ? createClient(url!,key!) : {
  storage:{from:()=>({getPublicUrl:()=>({data:{publicUrl:''}})})}
 };
 export function pub(bucket:string,path:string){ if(!isSupabaseConfigured||!path)return ''; return supabase.storage.from(bucket).getPublicUrl(path).data.publicUrl; }
+// Reads the readable message from a failed Edge Function call.
+export async function fnErr(error:any,data?:any):Promise<string>{
+ if(data?.error)return data.error;
+ try{const j=await error?.context?.json?.();if(j?.error)return j.error;}catch{}
+ return error?.message||'';
+}

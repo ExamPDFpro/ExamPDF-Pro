@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Search, ShoppingCart, User, X } from "lucide-react";
-import { supabase, PRODUCT_COLS, pub, type Product } from "./lib/supabase";
+import { supabase, PRODUCT_COLS, pub, fnErr, type Product } from "./lib/supabase";
 import Preview from "./Preview";
 import Checkout from "./Checkout";
 import Hero3D from "./Hero3D";
@@ -53,6 +53,7 @@ export default function App() {
     if (b.favicon_url) { let l = document.querySelector("link[rel='icon']") as HTMLLinkElement | null; if (!l) { l = document.createElement("link"); l.rel = "icon"; document.head.appendChild(l); } l.href = b.favicon_url; }
   }, [site]);
   const add = (p: Product) => { if (owned.includes(p.id)) return say("এই PDF আপনি আগেই কিনেছেন।"); if (cart.includes(p.id)) return say("কার্টে আগেই আছে।"); setCart([...cart, p.id]); say("কার্টে যোগ হয়েছে ✓"); };
+  const download = async (p: Product) => { const { data, error } = await supabase.functions.invoke("download-pdf", { body: { product_id: p.id } }); if (error || !data?.url) return say((await fnErr(error, data)) || "Download করা যায়নি।"); window.location.href = data.url; };
   const buy = (p: Product) => setModal(user ? { t: "checkout", p } : { t: "auth", p });
   const cartItems = cart.map((id) => products.find((p) => p.id === id)).filter(Boolean) as Product[];
   // Keep all eight core exam chips, while honoring Admin renames, visibility and order.
@@ -140,7 +141,7 @@ export default function App() {
       </footer>
 
       {m?.t === "preview" && pp && <Preview p={pp} cat={displayCats.find((c) => c.id === pp.category_id)?.name} url={pp.preview_enabled && pp.preview_pdf_path ? pub("pdf-previews", pp.preview_pdf_path) : ""}
-        owned={owned.includes(pp.id)} onClose={() => setModal(null)} onBuy={() => buy(pp)} onAdd={() => add(pp)} />}
+        owned={owned.includes(pp.id)} onClose={() => setModal(null)} onBuy={() => buy(pp)} onAdd={() => add(pp)} onDownload={() => download(pp)} />}
       {m?.t === "cart" && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-2" onClick={() => setModal(null)}>
           <div className="card w-full max-w-md bg-navy p-4" onClick={(e) => e.stopPropagation()}>
