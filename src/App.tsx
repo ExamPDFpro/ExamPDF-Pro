@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Search, ShoppingCart, User, X } from "lucide-react";
+import { BookOpen, Facebook, FileText, Headphones, Instagram, Languages, Mail, MessageCircle, Search, Send, ShieldCheck, ShoppingCart, User, X, Youtube } from "lucide-react";
 import { supabase, PRODUCT_COLS, pub, fnErr, type Product } from "./lib/supabase";
 import Preview from "./Preview";
 import Checkout from "./Checkout";
@@ -134,11 +134,42 @@ export default function App() {
         {secOrder.map((id: string) => <div key={id}>{secMap[id]}</div>)}
         {products.length === 0 && <p className="py-10 text-center text-white/60">এখনো কোনো PDF প্রকাশ হয়নি।</p>}</>}
 
-      <footer className="site-footer mt-10 border-t border-gold/30 px-4 py-8 text-center text-sm text-white/60">
-        <p className="font-bold text-gold">{site.footer?.heading || "Contact & Support"}</p>
-        <p className="mt-2">{site.contact?.email || ""}{site.contact?.email && site.contact?.phone ? " • " : ""}{site.contact?.phone || ""}</p>{site.footer?.support && <p className="mt-1">{site.footer.support}</p>}{site.footer?.logo_url && <img src={site.footer.logo_url} alt="" className="mx-auto my-2 h-8" />}<p className="mt-2">{Object.entries(site.social || {}).filter(([, u]: any) => /^https?:\/\//.test(u)).map(([k, u]: any) => <a key={k} href={u} target="_blank" rel="noopener noreferrer" className="mx-2 capitalize underline">{k}</a>)}</p>
-        <p className="mt-3 border-t border-white/10 pt-3 text-xs">{site.footer?.copyright || `© ${new Date().getFullYear()} ${site.brand?.title || "ExamPDF Pro"}. All Rights Reserved.`}</p>
+      <footer className="site-footer mt-10 border-t border-gold/30 px-4 pt-8 text-sm text-white/60">
+        {(() => {
+          const soc: [string, any][] = [["facebook", Facebook], ["instagram", Instagram], ["youtube", Youtube], ["telegram", Send], ["whatsapp", MessageCircle]];
+          const go = (c: string | null) => { setCat(c); document.getElementById("secs")?.scrollIntoView({ behavior: "smooth" }); };
+          const cl = "block py-1 text-left hover:text-gold";
+          const footCats = [0, 1, 2, 3, 4, 6].map((i) => coreCats[i]).filter(Boolean);
+          return <div className="mx-auto grid max-w-[1100px] grid-cols-2 gap-6 pb-6 md:grid-cols-[1.4fr_1fr_1fr_1fr_1fr]">
+            <div className="col-span-2 md:col-span-1">
+              <p className="flex items-center gap-2 text-lg font-black text-gold"><BookOpen className="h-5 w-5" />{site.brand?.title || "ExamPDF Pro"}</p>
+              <p className="mt-1 text-xs text-white/50">{site.brand?.tagline || "Study Smart • Score High"}</p>
+              <p className="mt-3 max-w-[230px] text-xs leading-5">{site.footer?.support || "Your trusted destination for exam preparation PDFs, notes and study resources."}</p>
+              {site.footer?.logo_url && <img src={site.footer.logo_url} alt="" className="my-2 h-8" />}
+              <div className="mt-3 flex gap-2">{soc.map(([k, Icon]) => { const u = site.social?.[k]; const ok = /^https?:\/\//.test(u || ""); const cls = "flex h-8 w-8 items-center justify-center rounded-full border border-gold/40 text-gold"; return ok
+                ? <a key={k} href={u} target="_blank" rel="noopener noreferrer" aria-label={k} className={cls + " hover:bg-gold hover:text-navy"}><Icon className="h-4 w-4" /></a>
+                : <span key={k} aria-label={k} className={cls + " opacity-50"}><Icon className="h-4 w-4" /></span>; })}</div>
+            </div>
+            <div><p className="mb-2 font-bold text-gold">Quick Links</p>
+              <button className={cl} onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>Home</button><span className={cl}>About Us</span>
+              <button className={cl} onClick={() => go(null)}>All PDFs</button><button className={cl} onClick={() => go(null)}>Popular Exams</button><button className={cl} onClick={() => go(null)}>Latest PDFs</button></div>
+            <div><p className="mb-2 font-bold text-gold">Categories</p>{footCats.map((c: any) => <button key={c.id} className={cl} onClick={() => go(c.id)}>{String(c.name).replace(/ CGL| IBPS/g, "")}</button>)}</div>
+            <div><p className="mb-2 font-bold text-gold">Customer Support</p>
+              {site.contact?.email ? <a className={cl} href={`mailto:${site.contact.email}`}><Mail className="mr-2 inline h-4 w-4" />Contact Us</a> : <span className={cl}><Mail className="mr-2 inline h-4 w-4" />Contact Us</span>}
+              <span className={cl}><Headphones className="mr-2 inline h-4 w-4" />Help Center</span><span className={cl}><FileText className="mr-2 inline h-4 w-4" />FAQ</span>
+              {(site.contact?.email || site.contact?.phone) && <p className="mt-2 text-xs text-white/50">{site.contact?.email}{site.contact?.email && site.contact?.phone ? " • " : ""}{site.contact?.phone}</p>}</div>
+            <div><p className="mb-2 font-bold text-gold">Legal</p>
+              <span className={cl}>Terms &amp; Conditions</span><span className={cl}>Privacy Policy</span><span className={cl}>Refund Policy</span><span className={cl}>Disclaimer</span>
+              <p className="mb-1 mt-4 flex items-center gap-2 font-bold text-gold"><Languages className="h-4 w-4" />Language</p>
+              <select className="input !py-2 text-sm" defaultValue="en" aria-label="Language"><option value="en">English</option></select></div>
+          </div>;
+        })()}
+        <div className="-mx-4 flex flex-wrap items-center justify-between gap-2 border-t border-white/10 bg-black/20 px-4 py-4 text-xs">
+          <span>{site.footer?.copyright || `© ${new Date().getFullYear()} ${site.brand?.title || "ExamPDF Pro"}. All Rights Reserved.`}</span>
+          <span><ShieldCheck className="mr-1 inline h-4 w-4 text-gold" />Secure learning. Smarter preparation.</span>
+        </div>
       </footer>
+      {cart.length > 0 && <div className="h-20" />}
 
       {m?.t === "preview" && pp && <Preview p={pp} cat={displayCats.find((c) => c.id === pp.category_id)?.name} url={pp.preview_enabled && pp.preview_pdf_path ? pub("pdf-previews", pp.preview_pdf_path) : ""}
         owned={owned.includes(pp.id)} onClose={() => setModal(null)} onBuy={() => buy(pp)} onAdd={() => add(pp)} onDownload={() => download(pp)} />}
