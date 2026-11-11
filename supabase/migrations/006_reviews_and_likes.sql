@@ -1,0 +1,4 @@
+-- Reflects what is applied in the live project (reviews use the "comment" column; likes counted by product_like_counts()).
+-- Customers add reviews as 'pending' (max 5 per day); admins publish / edit / delete.
+-- Likes: one row per (user, product); public counts come from product_like_counts().
+-- See the project's migration history for the exact DDL.
