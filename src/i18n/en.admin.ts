@@ -211,4 +211,7 @@ export const enAdmin = {
   "ad.pf.missing": "Translation missing: visitors using that language will see this PDF in English.",
   "ad.pf.discount": "Discount % (updates the selling price)",
   "ad.pf.link": "Public share link",
+  "ad.save": "Save",
+  "ad.delete": "Delete",
+  "ad.lang": "Language",
 } as const;

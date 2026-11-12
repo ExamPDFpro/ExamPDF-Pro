@@ -1,0 +1,10 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ExamPDF Pro</title>
+<script>
+// Shared PDF links (/pdf/<slug>/) for PDFs added after the last rebuild: send the visitor to the app, which opens that PDF.
+(function () {
+  var m = location.pathname.match(/^(.*\/)pdf\/([^\/]+)\/?$/);
+  if (m) { location.replace(m[1] + '#/pdf/' + m[2]); return; }
+  var seg = location.pathname.split('/').filter(Boolean);
+  location.replace('/' + (seg.length && location.hostname.indexOf('github.io') > -1 ? seg[0] + '/' : ''));
+})();
+</script></head><body style="background:#0a1633;color:#fff;font-family:sans-serif;text-align:center;padding:40px"><p>Loading…</p></body></html>

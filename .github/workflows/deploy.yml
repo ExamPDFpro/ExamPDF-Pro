@@ -3,6 +3,8 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+  schedule:
+    - cron: '23 */6 * * *'   # rebuild share pages so newly added PDFs get previews
 permissions:
   contents: read
   pages: write
@@ -25,6 +27,11 @@ jobs:
           # Public values (the anon key is designed to be exposed in the browser; RLS protects the data).
           VITE_SUPABASE_URL: https://fcintcfmtlnuqvlsrism.supabase.co
           VITE_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZjaW50Y2ZtdGxudXF2bHNyaXNtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQyOTUwMjgsImV4cCI6MjEwOTg3MTAyOH0.4VUPq7WwGG9ocZw_uYXqAm1b2SoaJk_oggbH3PsfKaw
+      - run: node scripts/prerender-share.mjs
+        env:
+          VITE_SUPABASE_URL: https://fcintcfmtlnuqvlsrism.supabase.co
+          VITE_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZjaW50Y2ZtdGxudXF2bHNyaXNtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQyOTUwMjgsImV4cCI6MjEwOTg3MTAyOH0.4VUPq7WwGG9ocZw_uYXqAm1b2SoaJk_oggbH3PsfKaw
+          SITE_URL: https://exampdfpro.github.io/ExamPDF-Pro/
       - uses: actions/configure-pages@v5
         with:
           enablement: true

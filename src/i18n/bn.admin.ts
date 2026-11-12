@@ -211,4 +211,7 @@ export const bnAdmin: Record<keyof typeof enAdmin, string> = {
   "ad.pf.missing": "অনুবাদ নেই: ওই ভাষার দর্শকরা এই PDF ইংরেজিতে দেখবেন।",
   "ad.pf.discount": "ছাড় % (বিক্রয়মূল্য বদলাবে)",
   "ad.pf.link": "শেয়ারের পাবলিক লিংক",
+  "ad.save": "সংরক্ষণ করুন",
+  "ad.delete": "মুছুন",
+  "ad.lang": "ভাষা",
 };

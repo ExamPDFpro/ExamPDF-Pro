@@ -211,4 +211,7 @@ export const hiAdmin: Record<keyof typeof enAdmin, string> = {
   "ad.pf.missing": "अनुवाद नहीं है: उस भाषा के आगंतुक यह PDF अंग्रेज़ी में देखेंगे।",
   "ad.pf.discount": "छूट % (बिक्री मूल्य बदलेगा)",
   "ad.pf.link": "शेयर का सार्वजनिक लिंक",
+  "ad.save": "सहेजें",
+  "ad.delete": "हटाएं",
+  "ad.lang": "भाषा",
 };
