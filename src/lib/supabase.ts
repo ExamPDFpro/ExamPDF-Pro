@@ -1,12 +1,14 @@
 import { createClient } from '@supabase/supabase-js';
+import { t, en, type Key } from '../i18n';
 
 export type Product = {
   id: string; title: string; description?: string; category_id?: string;
   selling_price: number; original_price: number; cover_url?: string;
   preview_enabled?: boolean; preview_pdf_path?: string; is_featured?: boolean;
   featured_order?: number; is_active?: boolean; is_published?: boolean;
+  slug?: string; title_bn?: string; title_hi?: string; description_bn?: string; description_hi?: string;
 };
-export const PRODUCT_COLS = 'id,title,description,category_id,selling_price,original_price,cover_url,preview_enabled,preview_pdf_path,is_featured,featured_order,is_active,is_published,created_at';
+export const PRODUCT_COLS = 'id,title,description,category_id,selling_price,original_price,cover_url,preview_enabled,preview_pdf_path,is_featured,featured_order,is_active,is_published,created_at,slug,title_bn,title_hi,description_bn,description_hi';
 const url = import.meta.env.VITE_SUPABASE_URL as string | undefined;
 const key = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
 export const isSupabaseConfigured = !!(url && key && !url.includes('YOUR_PROJECT') && !key.includes('YOUR_'));
@@ -44,9 +46,10 @@ export const supabase:any = isSupabaseConfigured ? createClient(url!,key!) : {
  storage:{from:()=>({getPublicUrl:()=>({data:{publicUrl:''}})})}
 };
 export function pub(bucket:string,path:string){ if(!isSupabaseConfigured||!path)return ''; return supabase.storage.from(bucket).getPublicUrl(path).data.publicUrl; }
-// Reads the readable message from a failed Edge Function call.
+// Reads the readable message from a failed Edge Function call (translated by error_code when possible).
 export async function fnErr(error:any,data?:any):Promise<string>{
- if(data?.error)return data.error;
- try{const j=await error?.context?.json?.();if(j?.error)return j.error;}catch{}
- return error?.message||'';
+ let code=data?.error_code,msg=data?.error,min=data?.min_order;
+ if(!code&&!msg){try{const j=await error?.context?.json?.();code=j?.error_code;msg=j?.error;min=j?.min_order;}catch{/* not JSON */}}
+ if(code&&('err.'+code) in en)return t(('err.'+code) as Key,{min:min??''});
+ return msg||error?.message||'';
 }

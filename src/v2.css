@@ -1,0 +1,10 @@
+/* v2 additions — only new class names; nothing here changes existing desktop styling. */
+@media (hover: none) {
+  .exam-card { transform: perspective(900px) rotateX(var(--m-rx, 0deg)) rotateY(var(--m-ry, 0deg)) translateY(var(--m-ty, 0px)); transition: transform .45s ease-out; }
+  .exam-card:active { transform: perspective(900px) rotateX(var(--m-rx, 0deg)) rotateY(var(--m-ry, 0deg)) translateY(-3px) scale(.985); transition-duration: .12s; }
+}
+@media (prefers-reduced-motion: reduce) { .exam-card { transform: none !important; } }
+html[lang='bn'] body, html[lang='bn'] input, html[lang='bn'] select, html[lang='bn'] textarea, html[lang='bn'] button { font-family: 'Noto Sans Bengali', var(--font); }
+html[lang='hi'] body, html[lang='hi'] input, html[lang='hi'] select, html[lang='hi'] textarea, html[lang='hi'] button { font-family: 'Noto Sans Devanagari', var(--font); }
+html[lang='bn'] .exam-hero-title, html[lang='hi'] .exam-hero-title { line-height: 1.25; }
+.v2-share:focus-visible, .v2-social-btn:focus-visible { outline: 2px solid rgb(var(--c-gold)); outline-offset: 2px; }

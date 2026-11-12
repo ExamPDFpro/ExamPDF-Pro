@@ -18,6 +18,9 @@ export const DEFAULT_BOOK = {
 export const DEFAULT_TEXTS = {
   search_placeholder: 'Search PDFs...', popular_title: 'Popular Exams',
   likes_enabled: true,
-  reviews_hidden: false, reviews_title: 'What Our Students Say', reviews_sub: 'প্রকৃত ছাত্র-ছাত্রীদের মতামত', reviews_button: 'Write a Review',
-  reviews_empty: 'এখনো কোনো review নেই। প্রথম review আপনিই দিন!',
+  reviews_hidden: false, reviews_title: 'What Our Students Say', reviews_sub: 'Genuine feedback from real students', reviews_button: 'Write a Review',
+  reviews_empty: 'No reviews yet. Be the first to write one!',
 };
+
+// Old Bengali defaults that may already be saved in the database: treated as "not customised" so the right language shows.
+export const LEGACY_DEFAULTS = new Set(['প্রকৃত ছাত্র-ছাত্রীদের মতামত', 'এখনো কোনো review নেই। প্রথম review আপনিই দিন!']);
