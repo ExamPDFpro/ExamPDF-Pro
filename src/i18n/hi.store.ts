@@ -47,4 +47,5 @@ export const hiStore: Record<keyof typeof enStore, string> = {
   'pdf.back': '← सभी PDF', 'pdf.desc': 'इस PDF के बारे में', 'pdf.notfound': 'यह PDF नहीं मिली या अब उपलब्ध नहीं है।', 'pdf.nodesc': 'कोई विवरण उपलब्ध नहीं है।',
   'mfa.title': 'दो-चरणीय सत्यापन', 'mfa.sub': 'अपने ऑथेंटिकेटर ऐप से 6 अंकों का कोड दर्ज करें।', 'mfa.code': '6 अंकों का कोड', 'mfa.verify': 'सत्यापित करें', 'mfa.bad': 'कोड सही नहीं है। फिर कोशिश करें।', 'mfa.out': 'साइन आउट',
   'social.visit': '{name} खोलें',
+  'co.toolarge': 'यह स्क्रीनशॉट 5 MB से बड़ा है। कृपया छोटी फ़ाइल चुनें।',
 };

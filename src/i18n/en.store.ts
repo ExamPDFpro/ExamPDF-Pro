@@ -47,4 +47,5 @@ export const enStore = {
   'pdf.back': '← All PDFs', 'pdf.desc': 'About this PDF', 'pdf.notfound': 'This PDF was not found or is no longer available.', 'pdf.nodesc': 'No description available.',
   'mfa.title': 'Two-step verification', 'mfa.sub': 'Enter the 6-digit code from your authenticator app.', 'mfa.code': '6-digit code', 'mfa.verify': 'Verify', 'mfa.bad': 'That code is not correct. Try again.', 'mfa.out': 'Sign out',
   'social.visit': 'Open {name}',
+  'co.toolarge': 'This screenshot is larger than 5 MB. Please choose a smaller file.',
 } as const;

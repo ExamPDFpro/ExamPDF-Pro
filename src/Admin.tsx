@@ -115,7 +115,7 @@ export default function Admin(){
    </>}
    {tab==='payments'&&<AdminPayments say={say}/>}
    {tab==='reports'&&<AdminReports/>}
-   {tab==='affiliates'&&<AdminAffiliates say={say}/>}
+   {tab==='affiliates'&&<AdminAffiliates say={say} isAdmin={role==='admin'}/>}
    {tab==='coupons'&&<AdminCoupons say={say}/>}
    {tab==='social'&&<AdminSocial say={say}/>}
    {tab==='i18n'&&<AdminTranslations say={say}/>}

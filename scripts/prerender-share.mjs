@@ -25,7 +25,7 @@ try {
 <meta property="og:type" content="website"><meta property="og:site_name" content="${esc(site)}"><meta property="og:title" content="${esc(title)}"><meta property="og:description" content="${esc(desc)}"><meta property="og:url" content="${esc(url)}">
 ${img ? `<meta property="og:image" content="${esc(img)}"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="${esc(img)}">` : '<meta name="twitter:card" content="summary">'}
 <meta name="twitter:title" content="${esc(title)}"><meta name="twitter:description" content="${esc(desc)}">
-<meta http-equiv="refresh" content="0;url=../../#/pdf/${esc(p.slug)}"><script>location.replace('../../#/pdf/${esc(p.slug)}')</script></head>
+<noscript><meta http-equiv="refresh" content="0;url=../../#/pdf/${esc(p.slug)}"></noscript><script>location.replace('../../#/pdf/${esc(p.slug)}'+(location.search?'?'+location.search.slice(1):''))</script></head>
 <body style="background:#0a1633;color:#fff;font-family:sans-serif;text-align:center;padding:40px"><h1>${esc(p.title)}</h1><p>${esc(desc)}</p><p><a style="color:#f5c04a" href="../../#/pdf/${esc(p.slug)}">Open</a></p></body></html>`;
     mkdirSync(`dist/pdf/${p.slug}`, { recursive: true }); writeFileSync(`dist/pdf/${p.slug}/index.html`, html); n++;
   }
