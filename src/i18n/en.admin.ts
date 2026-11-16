@@ -135,6 +135,7 @@ export const enAdmin = {
   "ad.aff.sales.commission": "Commission",
   "ad.aff.sales.utr": "Customer UTR",
   "ad.aff.sales.payto": "Pay commission to",
+  "ad.aff.sales.copy": "Copy",
   "ad.aff.sales.coupon": "Coupon",
   "ad.aff.badpct": "Commission must be between 0 and 100.",
   "ad.aff.badslug": "Link name must be 3-40 characters: a-z, 0-9, - or _",

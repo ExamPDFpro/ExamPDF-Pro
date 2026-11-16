@@ -135,6 +135,7 @@ export const bnAdmin: Record<keyof typeof enAdmin, string> = {
   "ad.aff.sales.commission": "কমিশন",
   "ad.aff.sales.utr": "গ্রাহকের UTR",
   "ad.aff.sales.payto": "কমিশন পাঠান",
+  "ad.aff.sales.copy": "কপি",
   "ad.aff.sales.coupon": "কুপন",
   "ad.aff.badpct": "কমিশন ০ থেকে ১০০-র মধ্যে হতে হবে।",
   "ad.aff.badslug": "লিংকের নাম ৩-৪০ অক্ষরের হতে হবে: a-z, 0-9, - বা _",

@@ -135,6 +135,7 @@ export const hiAdmin: Record<keyof typeof enAdmin, string> = {
   "ad.aff.sales.commission": "कमीशन",
   "ad.aff.sales.utr": "ग्राहक का UTR",
   "ad.aff.sales.payto": "कमीशन यहाँ भेजें",
+  "ad.aff.sales.copy": "कॉपी",
   "ad.aff.sales.coupon": "कूपन",
   "ad.aff.badpct": "कमीशन 0 से 100 के बीच होना चाहिए।",
   "ad.aff.badslug": "लिंक का नाम 3-40 अक्षरों का होना चाहिए: a-z, 0-9, - या _",

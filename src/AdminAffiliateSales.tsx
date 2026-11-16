@@ -58,7 +58,7 @@ export function AffiliateSales({ say }: { say: (s: string) => void }) {
         <span className="rounded-full border border-white/15 px-2 py-0.5 text-xs">{r.order_state} · {r.commission_state}</span></div>
       <p className="mt-1 text-xs text-white/60">{r.pdfs}{r.coupon ? ` · ${t('ad.aff.sales.coupon')}: ${r.coupon}` : ''}</p>
       <div className="mt-2 grid gap-2 text-xs sm:grid-cols-4"><p><span className="text-white/50">{t('ad.aff.sales.paid')}</span><br /><b>₹{r.total}</b></p><p><span className="text-white/50">{t('ad.aff.sales.commission')}</span><br /><b>₹{r.commission} ({r.pct}%)</b></p>
-        <p className="sm:col-span-2"><span className="text-white/50">{t('ad.aff.sales.utr')}</span><br /><b className="select-all break-all">{r.utr || '—'}</b>{r.utr && <button className="ml-2 text-gold underline" onClick={() => copy(r.utr)}>{t('ad.aff.copy')}</button>}</p></div>
+        <p className="sm:col-span-2"><span className="text-white/50">{t('ad.aff.sales.utr')}</span><br /><b className="select-all break-all">{r.utr || '—'}</b>{r.utr && <button className="ml-2 text-gold underline" onClick={() => copy(r.utr)}>{t('ad.aff.sales.copy')}</button>}</p></div>
       <p className="mt-2 text-xs"><span className="text-white/50">{t('ad.aff.sales.payto')}: </span>{r.pay_upi || bank(r) ? <>{r.pay_upi && <b className="select-all">{r.pay_upi}</b>}{r.pay_upi && bank(r) ? ' · ' : ''}{bank(r) && <span className="select-all">{bank(r)}</span>}</> : <span className="text-white/40">{t('ad.aff.pd.none')}</span>}</p>
     </div>)}
   </div>;
