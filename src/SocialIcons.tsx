@@ -23,7 +23,7 @@ export default function SocialIcons({ site }: { site: any }) {
   return <div className="v2-social mt-3 flex flex-wrap gap-2.5">{items.map((it) => {
     const pf = PLATFORMS.find((p) => p.id === it.platform) || PLATFORMS[PLATFORMS.length - 1];
     return <a key={it.id} href={it.url.trim()} target="_blank" rel="noopener noreferrer" aria-label={t('social.visit', { name: pf.name })} title={pf.name}
-      onClick={() => { if (isSupabaseConfigured) supabase.rpc('track_social_click', { p_platform: pf.id }); }}
+      onClick={() => { if (isSupabaseConfigured) supabase.rpc('track_social_click', { p_platform: pf.id }).then(() => undefined, () => undefined); }}
       className="v2-social-btn flex h-11 w-11 items-center justify-center rounded-full border border-gold/50 text-gold shadow-[0_4px_14px_rgba(0,0,0,.35)] transition duration-200 hover:-translate-y-0.5 hover:scale-110 hover:bg-gold hover:text-navy active:scale-95 md:h-10 md:w-10">{pf.icon('h-[18px] w-[18px]')}</a>;
   })}</div>;
 }

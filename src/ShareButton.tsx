@@ -18,7 +18,7 @@ export default function ShareButton({ p, brand = 'ExamPDF Pro' }: { p: Product; 
       try { await navigator.clipboard.writeText(url); } catch { const ta = document.createElement('textarea'); ta.value = url; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); } catch { /* ignore */ } ta.remove(); }
       setDone(true); setTimeout(() => setDone(false), 1800); channel = 'copy';
     }
-    if (isSupabaseConfigured) supabase.rpc('track_share', { p_product_id: p.id, p_channel: channel });
+    if (isSupabaseConfigured) supabase.rpc('track_share', { p_product_id: p.id, p_channel: channel }).then(() => undefined, () => undefined);
   }
   return <span className="ml-1.5 inline-flex items-center align-middle"><button type="button" onClick={go} aria-label={t('share.label')} title={t('share.label')} className="v2-share inline-flex h-6 w-6 items-center justify-center rounded-full text-white/45 transition hover:text-gold"><Share2 size={14} /></button>{done && <span role="status" className="ml-1 text-[10px] font-semibold text-gold">{t('share.copied')}</span>}</span>;
 }

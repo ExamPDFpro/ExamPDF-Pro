@@ -20,5 +20,5 @@ export function captureRef(productId?: string) {
   if (!isSupabaseConfigured) return;
   const tk = `exampdf_clk_${r}_${productId || ''}`;
   try { if (sessionStorage.getItem(tk)) return; sessionStorage.setItem(tk, '1'); } catch { /* ignore */ }
-  supabase.rpc('track_affiliate_click', { p_slug: r, p_session: sid(), p_product: productId || null });
+  supabase.rpc('track_affiliate_click', { p_slug: r, p_session: sid(), p_product: productId || null }).then(() => undefined, () => undefined);   // .then() is what actually sends the request
 }

@@ -2,11 +2,12 @@ import { useEffect, useState } from 'react';
 import { supabase } from './lib/supabase';
 import { useT, type Key } from './i18n';
 import { siteBase } from './lib/share';
+import { PayoutDetailsForm, AffiliateSales } from './AdminAffiliateSales';
 const input = 'w-full rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-sm';
 const label = 'mb-1 block text-xs text-white/60';
 const PLATFORMS = ['YouTube', 'Facebook', 'Instagram', 'Telegram', 'WhatsApp', 'X', 'Other'];
 const STATUSES = ['applied', 'active', 'disabled', 'rejected'] as const;
-export default function AdminAffiliates({ say }: { say: (s: string) => void }) {
+export default function AdminAffiliates({ say, isAdmin = false }: { say: (s: string) => void; isAdmin?: boolean }) {
   const t = useT();
   const [affs, setAffs] = useState<any[]>([]), [stats, setStats] = useState<Record<string, any>>({}), [links, setLinks] = useState<any[]>([]), [pays, setPays] = useState<any[]>([]), [prods, setProds] = useState<any[]>([]), [pdfClicks, setPdfClicks] = useState<any[]>([]), [uid, setUid] = useState('');
   const [nf, setNf] = useState({ name: '', email: '', phone: '', platform: 'YouTube', channel_url: '', commission_pct: '10', status: 'active' });
@@ -50,6 +51,7 @@ export default function AdminAffiliates({ say }: { say: (s: string) => void }) {
       <label><span className={label}>{t('ad.aff.channel')}</span><input maxLength={300} className={input} placeholder="https://" value={nf.channel_url} onChange={e => setNf({ ...nf, channel_url: e.target.value })} /></label>
       <label><span className={label}>{t('ad.aff.pct')}</span><input type="number" min={0} max={100} step="0.01" className={input} value={nf.commission_pct} onChange={e => setNf({ ...nf, commission_pct: e.target.value })} /></label>
       <button className="btn-gold sm:col-span-3 sm:w-fit">{t('ad.aff.add')}</button></form>
+    {isAdmin && <AffiliateSales say={say} />}
     <div className="admin-panel mb-4 p-4"><h3 className="mb-3 font-bold text-gold">{t('ad.aff.list')}</h3>
       {affs.length === 0 && <p className="py-4 text-center text-sm text-white/50">{t('ad.aff.none')}</p>}
       {affs.map(a => { const s = stats[a.id] || {}; const my = links.filter(l => l.affiliate_id === a.id); const myPays = pays.filter(p => p.affiliate_id === a.id); const f = lf[a.id] || { slug: '', product: '' }; const p = pf[a.id] || { amount: '', method: '', reference: '', note: '' };
@@ -66,6 +68,7 @@ export default function AdminAffiliates({ say }: { say: (s: string) => void }) {
           <p className="mb-1 mt-4 text-xs font-bold text-white/60">{t('ad.aff.payout')}</p>
           <div className="grid gap-2 sm:grid-cols-5"><input type="number" min={0} step="0.01" className={input} placeholder={t('ad.aff.amt')} value={p.amount} onChange={e => setPf({ ...pf, [a.id]: { ...p, amount: e.target.value } })} /><input className={input} placeholder={t('ad.aff.method')} value={p.method} onChange={e => setPf({ ...pf, [a.id]: { ...p, method: e.target.value } })} /><input className={input} placeholder={t('ad.aff.ref')} value={p.reference} onChange={e => setPf({ ...pf, [a.id]: { ...p, reference: e.target.value } })} /><input className={input} placeholder={t('ad.aff.pnote')} value={p.note} onChange={e => setPf({ ...pf, [a.id]: { ...p, note: e.target.value } })} /><button className="btn-gold" onClick={() => pay(a)}>{t('ad.aff.payout')}</button></div>
           {myPays.length > 0 && <div className="mt-2 text-xs text-white/60"><p className="font-bold">{t('ad.aff.payouts')}</p>{myPays.map(x => <p key={x.id}>{new Date(x.paid_at).toLocaleDateString()} · ₹{x.amount}{x.method ? ' · ' + x.method : ''}{x.reference ? ' · ' + x.reference : ''}{x.note ? ' · ' + x.note : ''}</p>)}</div>}
+          {isAdmin && <PayoutDetailsForm affiliateId={a.id} say={say} />}
         </div>; })}
     </div>
     <div className="admin-panel p-4"><h3 className="mb-3 font-bold text-gold">{t('ad.aff.pdfclicks')}</h3>{pdfClicks.length === 0 ? <p className="py-3 text-center text-sm text-white/50">{t('ad.none')}</p> : pdfClicks.map((x: any) => <p key={x.product_id} className="flex justify-between border-t border-white/10 py-1.5 text-sm"><span>{x.title}</span><b>{x.clicks}</b></p>)}</div>

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { X, ShieldCheck, Upload, AlertCircle } from 'lucide-react';
 import { isSupabaseConfigured, supabase, fnErr, type Product } from './lib/supabase';
 import { getRef } from './lib/affiliate';
+import { compressProof, MAX_PROOF_BYTES } from './lib/compress';
 import { useT, en, type Key } from './i18n';
 type Order={id:string;total:number};
 type Quote={subtotal:number;discount:number;total:number;coupon_code?:string|null};
@@ -27,11 +28,12 @@ export default function Checkout({items,existing,user,say,onClose,onDone}:{items
  const sum=items.reduce((s,p)=>s+Number(p.selling_price),0);
  const total=existing?.total??quote?.total??sum;
  const hasPay=!!(pay.upi_id||pay.qr_url||pay.account_number);
- async function submit(){if(!isSupabaseConfigured){say(t('co.needsetup'));return;}if(!file||!utr.trim()){say(t('co.need'));return;}setBusy(true);try{
+ async function submit(){if(!isSupabaseConfigured){say(t('co.needsetup'));return;}if(!file||!utr.trim()){say(t('co.need'));return;}if(file.size>MAX_PROOF_BYTES){say(t('co.toolarge'));return;}setBusy(true);try{
   // Payment submissions are processed by a server-side Edge Function: it re-prices the order and records the UTR.
   const {data,error}=await supabase.functions.invoke('submit-payment',{body:{order_id:existing?.id,product_ids:ids,payment_reference:utr.trim(),coupon_code:applied||undefined,ref:getRef()||undefined}});
   if(error||!data?.upload_path)throw new Error((await fnErr(error,data))||t('co.noendpoint'));
-  const up=await supabase.storage.from('payment-proofs').upload(data.upload_path,file,{upsert:false});if(up.error)throw up.error;
+  const proof=(await compressProof(file)).file;   // images only; PDFs and failures fall back to the original
+  const up=await supabase.storage.from('payment-proofs').upload(data.upload_path,proof,{upsert:false,contentType:proof.type||undefined});if(up.error)throw up.error;
   say(t('co.done'));onDone();onClose();
  }catch(e:any){say(e.message||t('co.fail'));}finally{setBusy(false)}}
  return <div className="fixed inset-0 z-[90] overflow-y-auto bg-black/80 p-3"><div className="card mx-auto my-5 w-full max-w-lg bg-navy p-5"><div className="mb-4 flex items-center justify-between"><div><span className="text-xs uppercase tracking-widest text-gold">{t('co.secure')}</span><h2 className="text-xl font-bold">{t('co.title')}</h2></div><button onClick={onClose} aria-label={t('common.close')}><X/></button></div>
@@ -45,7 +47,7 @@ export default function Checkout({items,existing,user,say,onClose,onDone}:{items
   {!isSupabaseConfigured&&<p className="mt-4 flex gap-2 rounded-lg border border-amber-400/30 bg-amber-400/10 p-3 text-sm text-amber-100"><AlertCircle className="h-5 w-5 shrink-0"/>{t('co.preview')}</p>}
   {hasPay&&<div className="mt-4 rounded-xl border border-gold/25 bg-white/5 p-4 text-sm"><p className="mb-2 font-semibold text-gold">{t('co.payto')}</p>{pay.qr_url&&<img src={pay.qr_url} alt="Payment QR" className="mx-auto mb-3 h-44 w-44 rounded-lg bg-white object-contain p-1"/>}{pay.upi_id&&<p>{t('co.upi')}: <b className="select-all">{pay.upi_id}</b>{pay.payee_name?` (${pay.payee_name})`:''}</p>}{pay.account_number&&<div className="mt-2 text-white/80"><p>{t('co.bank')}: {pay.bank_name}</p><p>{t('co.acname')}: {pay.account_name}</p><p>{t('co.acno')}: <b className="select-all">{pay.account_number}</b></p><p>{t('co.ifsc')}: <b className="select-all">{pay.ifsc}</b></p></div>}{pay.note&&<p className="mt-2 text-xs text-white/60">{pay.note}</p>}<p className="mt-2 text-xs text-white/50">{t('co.after')}</p></div>}
   <label className="mt-4 block text-sm font-medium">{t('co.utr')}<input value={utr} onChange={e=>setUtr(e.target.value)} className="input mt-1" placeholder={t('co.utrph')}/></label>
-  <label className="mt-4 block text-sm font-medium">{t('co.shot')}<input type="file" accept="image/png,image/jpeg,image/webp,application/pdf" onChange={e=>setFile(e.target.files?.[0]||null)} className="mt-2 block w-full text-sm text-white/70"/><span className="mt-1 block text-xs text-white/45">{t('co.shotnote')}</span></label>
+  <label className="mt-4 block text-sm font-medium">{t('co.shot')}<input type="file" accept="image/png,image/jpeg,image/webp,application/pdf" onChange={e=>{const f=e.target.files?.[0]||null;if(f&&f.size>MAX_PROOF_BYTES){say(t('co.toolarge'));e.target.value='';setFile(null);return;}setFile(f);}} className="mt-2 block w-full text-sm text-white/70"/><span className="mt-1 block text-xs text-white/45">{t('co.shotnote')}</span></label>
   <button disabled={busy} onClick={submit} className="btn-gold mt-5 w-full disabled:opacity-50">{busy?t('co.submitting'):<><Upload className="mr-2 inline h-4 w-4"/> {t('co.submit')}</>}</button><p className="mt-3 text-center text-xs text-white/45"><ShieldCheck className="mr-1 inline h-4 w-4"/> {t('co.trust')}</p>
  </div></div>
 }

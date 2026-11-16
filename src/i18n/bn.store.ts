@@ -47,4 +47,5 @@ export const bnStore: Record<keyof typeof enStore, string> = {
   'pdf.back': '← সব PDF', 'pdf.desc': 'এই PDF সম্পর্কে', 'pdf.notfound': 'এই PDF পাওয়া যায়নি বা আর পাওয়া যাচ্ছে না।', 'pdf.nodesc': 'কোনো বিবরণ নেই।',
   'mfa.title': 'দুই-ধাপে যাচাই', 'mfa.sub': 'আপনার অথেনটিকেটর অ্যাপ থেকে ৬ অঙ্কের কোডটি লিখুন।', 'mfa.code': '৬ অঙ্কের কোড', 'mfa.verify': 'যাচাই করুন', 'mfa.bad': 'কোডটি সঠিক নয়। আবার চেষ্টা করুন।', 'mfa.out': 'সাইন আউট',
   'social.visit': '{name} খুলুন',
+  'co.toolarge': 'এই স্ক্রিনশটটি ৫ MB-এর বেশি বড়। অনুগ্রহ করে ছোট ফাইল বেছে নিন।',
 };
