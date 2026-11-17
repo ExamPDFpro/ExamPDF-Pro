@@ -14,6 +14,7 @@ import SocialIcons from "./SocialIcons";
 import PdfPage from "./PdfPage";
 import AffiliateApply from "./AffiliateApply";
 import { captureRef } from "./lib/affiliate";
+import AffiliateDashboard from "./AffiliateDashboard";
 import { pdfRouteSlug } from "./lib/share";
 
 const DEFAULT_CATS = [
@@ -26,6 +27,7 @@ type Modal = { t: "preview" | "cart" | "checkout" | "auth" | "account" | "review
 
 export default function App() {
   if (window.location.hash === "#admin") return <Admin />;
+  if (window.location.hash === "#affiliate") return <AffiliateDashboard />;
   const [user, setUser] = useState<any>(null), [products, setProducts] = useState<Product[]>([]), [cats, setCats] = useState<any[]>([]);
   const [best, setBest] = useState<string[]>([]), [site, setSite] = useState<Record<string, any>>({}), [owned, setOwned] = useState<string[]>([]);
   const [cart, setCart] = useState<string[]>(() => { try { return JSON.parse(localStorage.getItem("cart") || "[]"); } catch { return []; } });
@@ -187,7 +189,7 @@ export default function App() {
             <div><p className="mb-2 font-bold text-gold">{dyn("foot.quick", F.quick_title || en["foot.quick"], "foot.quick")}</p>
               <button className={cl} onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>{t("common.home")}</button>
               <button className={cl} onClick={() => go(null)}>{t("foot.allpdfs")}</button><button className={cl} onClick={() => go(null)}>{t("foot.popular")}</button><PageLinks g="quick" />
-              <button className={cl} onClick={() => setModal({ t: "affiliate" })}>{t("foot.affiliate")}</button></div>
+              <button className={cl} onClick={() => setModal({ t: "affiliate" })}>{t("foot.affiliate")}</button><button className={cl} onClick={() => { window.location.hash = "affiliate"; window.location.reload(); }}>{t("foot.affdash")}</button></div>
             <div><p className="mb-2 font-bold text-gold">{dyn("foot.cats", F.cats_title || en["foot.cats"], "foot.cats")}</p>{footCats.map((c: any) => <button key={c.id} className={cl} onClick={() => go(c.id)}>{cn(c).replace(/ CGL| IBPS/g, "")}</button>)}</div>
             <div><p className="mb-2 font-bold text-gold">{dyn("foot.support", F.support_title || en["foot.support"], "foot.support")}</p>
               {site.contact?.email ? <a className={cl} href={`mailto:${site.contact.email}`}><Mail className="mr-2 inline h-4 w-4" />{t("foot.contact")}</a> : <span className={cl}><Mail className="mr-2 inline h-4 w-4" />{t("foot.contact")}</span>}
