@@ -89,4 +89,11 @@ export const enStore = {
   'cb.limited': 'Too many requests. Please try again later.',
   'cb.error': 'Could not send. Please try again.',
   'foot.affdash': 'Affiliate dashboard',
+  'pw.title': 'Set a new password',
+  'pw.note': 'Choose a new password for your account. At least 8 characters.',
+  'pw.new': 'New password',
+  'pw.save': 'Save password',
+  'pw.short': 'Password must be at least 8 characters.',
+  'pw.error': 'Could not change the password. Please try again from the email link.',
+  'pw.done': 'Password changed ✓ You can now log in.',
 } as const;

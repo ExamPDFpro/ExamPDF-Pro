@@ -3,6 +3,7 @@ import { supabase } from './lib/supabase';
 import { useT, type Key } from './i18n';
 import { siteBase } from './lib/share';
 import { PayoutDetailsForm, AffiliateSales } from './AdminAffiliateSales';
+import AffiliateAccess from './AdminAffiliateAccess';
 const input = 'w-full rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-sm';
 const label = 'mb-1 block text-xs text-white/60';
 const PLATFORMS = ['YouTube', 'Facebook', 'Instagram', 'Telegram', 'WhatsApp', 'X', 'Other'];
@@ -68,6 +69,7 @@ export default function AdminAffiliates({ say, isAdmin = false }: { say: (s: str
           <p className="mb-1 mt-4 text-xs font-bold text-white/60">{t('ad.aff.payout')}</p>
           <div className="grid gap-2 sm:grid-cols-5"><input type="number" min={0} step="0.01" className={input} placeholder={t('ad.aff.amt')} value={p.amount} onChange={e => setPf({ ...pf, [a.id]: { ...p, amount: e.target.value } })} /><input className={input} placeholder={t('ad.aff.method')} value={p.method} onChange={e => setPf({ ...pf, [a.id]: { ...p, method: e.target.value } })} /><input className={input} placeholder={t('ad.aff.ref')} value={p.reference} onChange={e => setPf({ ...pf, [a.id]: { ...p, reference: e.target.value } })} /><input className={input} placeholder={t('ad.aff.pnote')} value={p.note} onChange={e => setPf({ ...pf, [a.id]: { ...p, note: e.target.value } })} /><button className="btn-gold" onClick={() => pay(a)}>{t('ad.aff.payout')}</button></div>
           {myPays.length > 0 && <div className="mt-2 text-xs text-white/60"><p className="font-bold">{t('ad.aff.payouts')}</p>{myPays.map(x => <p key={x.id}>{new Date(x.paid_at).toLocaleDateString()} · ₹{x.amount}{x.method ? ' · ' + x.method : ''}{x.reference ? ' · ' + x.reference : ''}{x.note ? ' · ' + x.note : ''}</p>)}</div>}
+          <AffiliateAccess a={a} say={say} onDone={load} />
           {isAdmin && <PayoutDetailsForm affiliateId={a.id} say={say} />}
         </div>; })}
     </div>

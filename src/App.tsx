@@ -16,6 +16,7 @@ import AffiliateApply from "./AffiliateApply";
 import { captureRef } from "./lib/affiliate";
 import AffiliateDashboard from "./AffiliateDashboard";
 import CallWidget from "./CallWidget";
+import PasswordRecovery from "./PasswordRecovery";
 import { loadCart, stampCart } from "./lib/cartExpiry";
 import { pdfRouteSlug } from "./lib/share";
 
@@ -228,6 +229,7 @@ export default function App() {
         onDone={() => { if (!m.p && !m.existing) setCart([]); }} />}
       {m?.t === "account" && user && <Account user={user} say={say} onClose={() => setModal(null)} onPay={(o) => setModal({ t: "checkout", existing: o })} />}
       {cart.length > 0 && !modal && <div className="fixed bottom-4 left-1/2 z-40 flex -translate-x-1/2 items-center gap-3 whitespace-nowrap rounded-2xl border border-gold/30 bg-navy/90 py-2 pl-4 pr-2 shadow-2xl backdrop-blur"><span>🛒 <b>{t("cart.items", { n: cartItems.length })}</b> • <b className="text-gold">₹{cartItems.reduce((s, p) => s + Number(p.selling_price), 0)}</b></span><button className="btn-gold !py-2" onClick={() => setModal(user ? { t: "checkout" } : { t: "auth" })}>{t("cart.checkout")}</button></div>}
+      <PasswordRecovery />
       {!modal && <CallWidget phone={site.contact?.phone} lift={cart.length > 0} />}
       {toast && <div className="fixed bottom-4 left-1/2 z-[60] -translate-x-1/2 rounded-full bg-gold px-4 py-2 font-semibold text-navy shadow-xl">{toast}</div>}
     </div>
