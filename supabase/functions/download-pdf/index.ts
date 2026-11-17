@@ -23,8 +23,8 @@ Deno.serve(async (req) => {
     if (!sf) { await rollback(); return fail("no_file"); }
     const { data: prod } = await svc.from("pdf_products").select("title").eq("id", product_id).maybeSingle();
     const name = `${(prod?.title || "ExamPDF").replace(/[^\w\- ]+/g, "").trim() || "ExamPDF"}.pdf`;
-    // Short-lived signed URL (10 minutes) from the PRIVATE bucket.
-    const { data: su, error: se } = await svc.storage.from("paid-pdfs").createSignedUrl(sf.storage_path, 600, { download: name });
+    // Short-lived signed URL (60 seconds) from the PRIVATE bucket.
+    const { data: su, error: se } = await svc.storage.from("paid-pdfs").createSignedUrl(sf.storage_path, 60, { download: name });
     if (se || !su) { await rollback(); return fail("server_error"); }
     return new Response(JSON.stringify({ url: su.signedUrl, remaining: c.remaining }), { headers: { ...cors, "Content-Type": "application/json" } });
   } catch (_e) { return fail("server_error"); }

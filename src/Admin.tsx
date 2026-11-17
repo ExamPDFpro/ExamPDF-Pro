@@ -10,6 +10,7 @@ import AdminReports from './AdminReports';
 import AdminStaff from './AdminStaff';
 import AdminActivity from './AdminActivity';
 import AdminSocial from './AdminSocial';
+import AdminPdfSecurity from './AdminPdfSecurity';
 import AdminCallbacks from './AdminCallbacks';
 import AdminTranslations from './AdminTranslations';
 import MfaChallenge from './MfaChallenge';
@@ -57,7 +58,8 @@ export default function Admin(){
  const saveSettings=async(keys:string[])=>{setSaving(true);const rows=keys.map(key=>({key,value:settings[key]??{}}));const {error}=await supabase.from('website_settings').upsert(rows,{onConflict:'key'});setSaving(false);if(error)say('সেভ হয়নি: '+error.message);else say('Website settings সংরক্ষণ হয়েছে ✓');};
  const upload=async(bucket:string,file:File)=>{const path=`${Date.now()}-${safeName(file.name)}`;const {error}=await supabase.storage.from(bucket).upload(path,file,{upsert:false,contentType:file.type||undefined});if(error)throw error;return path;};
  const editProduct=async(p:Product)=>setForm({id:p.id,title:p.title,description:p.description||'',title_bn:(p as any).title_bn||'',title_hi:(p as any).title_hi||'',description_bn:(p as any).description_bn||'',description_hi:(p as any).description_hi||'',discount_pct:(p as any).discount_pct?String((p as any).discount_pct):'',category_id:p.category_id||'',selling_price:String(p.selling_price),original_price:String(p.original_price||0),cover_url:p.cover_url||'',preview_enabled:!!p.preview_enabled,preview_pdf_path:p.preview_pdf_path||'',is_featured:!!p.is_featured,featured_order:String(p.featured_order||0),is_active:p.is_active!==false,is_published:!!p.is_published,secure_path:secure[p.id]||''});
- const saveProduct=async(e:FormEvent)=>{e.preventDefault();if(!form.title.trim()){say('PDF-এর নাম লিখুন।');return;}if(!form.id&&!fullFile){say('নতুন PDF-এর Full PDF ফাইলটি আপলোড করুন।');return;}setSaving(true);try{
+ const saveProduct=async(e:FormEvent)=>{e.preventDefault();if(!form.title.trim()){say('PDF-এর নাম লিখুন।');return;}if(!form.id&&!fullFile){say('নতুন PDF-এর Full PDF ফাইলটি আপলোড করুন।');return;}if(previewFile&&(previewFile.size>=3*1048576||(fullFile&&previewFile.size>=fullFile.size*0.5))&&!confirm(t('ad.sec.bigpreview')))return;
+ setSaving(true);try{
   let cover=form.cover_url,preview=form.preview_pdf_path,securePath=form.secure_path;
   if(coverFile){const path=await upload('covers',coverFile);cover=supabase.storage.from('covers').getPublicUrl(path).data.publicUrl;}
   if(previewFile)preview=await upload('pdf-previews',previewFile);
@@ -115,7 +117,7 @@ export default function Admin(){
     <AdminBook settings={settings} setSettings={setSettings} saveSettings={saveSettings} saving={saving}/>
    </>}
    {tab==='payments'&&<AdminPayments say={say}/>}
-   {tab==='reports'&&<AdminReports/>}
+   {tab==='reports'&&<><AdminPdfSecurity/><AdminReports/></>}
    {tab==='affiliates'&&<AdminAffiliates say={say} isAdmin={role==='admin'}/>}
    {tab==='coupons'&&<AdminCoupons say={say}/>}
    {tab==='social'&&<AdminSocial say={say}/>}
