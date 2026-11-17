@@ -8,3 +8,11 @@ html[lang='bn'] body, html[lang='bn'] input, html[lang='bn'] select, html[lang='
 html[lang='hi'] body, html[lang='hi'] input, html[lang='hi'] select, html[lang='hi'] textarea, html[lang='hi'] button { font-family: 'Noto Sans Devanagari', var(--font); }
 html[lang='bn'] .exam-hero-title, html[lang='hi'] .exam-hero-title { line-height: 1.25; }
 .v2-share:focus-visible, .v2-social-btn:focus-visible { outline: 2px solid rgb(var(--c-gold)); outline-offset: 2px; }
+
+/* Phase D: review slider (only used when there are 4+ reviews) */
+.rv-marquee{overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 4%,#000 96%,transparent);mask-image:linear-gradient(90deg,transparent,#000 4%,#000 96%,transparent)}
+.rv-track{display:flex;gap:1rem;width:max-content;animation:rv-scroll linear infinite}
+.rv-card{width:min(78vw,300px);flex:none}
+.rv-track:hover,.rv-track.rv-hold{animation-play-state:paused}
+@keyframes rv-scroll{from{transform:translateX(0)}to{transform:translateX(calc(-50% - .5rem))}}
+@media (prefers-reduced-motion:reduce){.rv-marquee{overflow-x:auto;-webkit-mask-image:none;mask-image:none}.rv-track{animation:none}}

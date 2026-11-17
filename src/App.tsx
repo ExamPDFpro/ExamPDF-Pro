@@ -16,6 +16,7 @@ import AffiliateApply from "./AffiliateApply";
 import { captureRef } from "./lib/affiliate";
 import AffiliateDashboard from "./AffiliateDashboard";
 import CallWidget from "./CallWidget";
+import { loadCart, stampCart } from "./lib/cartExpiry";
 import { pdfRouteSlug } from "./lib/share";
 
 const DEFAULT_CATS = [
@@ -31,7 +32,7 @@ export default function App() {
   if (window.location.hash === "#affiliate") return <AffiliateDashboard />;
   const [user, setUser] = useState<any>(null), [products, setProducts] = useState<Product[]>([]), [cats, setCats] = useState<any[]>([]);
   const [best, setBest] = useState<string[]>([]), [site, setSite] = useState<Record<string, any>>({}), [owned, setOwned] = useState<string[]>([]);
-  const [cart, setCart] = useState<string[]>(() => { try { return JSON.parse(localStorage.getItem("cart") || "[]"); } catch { return []; } });
+  const [cart, setCart] = useState<string[]>(() => loadCart());
   const [likes, setLikes] = useState<Record<string, number>>({}), [myLikes, setMyLikes] = useState<string[]>([]), [reviews, setReviews] = useState<any[]>([]);
   const [q, setQ] = useState(""), [cat, setCat] = useState<string | null>(null), [modal, setModal] = useState<Modal>(null), [toast, setToast] = useState("");
   const say = (m: string) => { setToast(m); setTimeout(() => setToast(""), 2800); };
@@ -63,7 +64,7 @@ export default function App() {
     const { error } = on ? await supabase.from("pdf_likes").delete().eq("user_id", user.id).eq("product_id", id) : await supabase.from("pdf_likes").insert({ user_id: user.id, product_id: id });
     if (error) { setMyLikes(on ? [...myLikes, id] : myLikes.filter((x) => x !== id)); setLikes((c) => ({ ...c, [id]: Math.max(0, (c[id] || 0) + (on ? 1 : -1)) })); say(error.message); }
   };
-  useEffect(() => localStorage.setItem("cart", JSON.stringify(cart)), [cart]);
+  useEffect(() => { localStorage.setItem("cart", JSON.stringify(cart)); stampCart(cart); }, [cart]);
 
   useEffect(() => {   // apply admin design settings (colors, font, animations)
     const t = site.theme || {}, st = document.documentElement.style;

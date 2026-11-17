@@ -10,10 +10,23 @@ export function ReviewsSection({ T, reviews, products, onWrite }: { T: any; revi
   return <section id="reviews" className="mx-auto max-w-[1100px] px-4 py-8">
     <div className="mb-4 flex flex-wrap items-end justify-between gap-3"><div><h2 className="exam-section-title text-xl font-black">{txt('rev.title', T.reviews_title, 'rev.title')}</h2>{sub && <p className="mt-1 text-sm text-white/60">{sub}</p>}</div><button className="btn-gold" onClick={onWrite}>{txt('rev.button', T.reviews_button, 'rev.button')}</button></div>
     {reviews.length === 0 ? <p className="rounded-xl border border-white/10 bg-white/[.03] p-6 text-center text-sm text-white/60">{txt('rev.empty', T.reviews_empty, 'rev.empty')}</p> :
+      reviews.length >= 4 ? <ReviewSlider reviews={reviews} products={products} /> :
       <div className="grid gap-4 md:grid-cols-3">{reviews.map(r => { const pd = products.find(p => p.id === r.product_id); return <div key={r.id} className="card bg-white/[.04] p-4">
         <Stars n={r.rating} /><p className="mt-2 text-sm leading-6 text-white/85">“{r.comment}”</p>
         <div className="mt-3 flex items-center justify-between gap-2 border-t border-white/10 pt-2 text-xs"><b className="text-gold">{r.author_name}</b>{pd && <span className="truncate text-white/50">{pd.title}</span>}</div></div>; })}</div>}
   </section>;
+}
+/** 4 or more reviews: a slow right-to-left slider. Pauses on hover and while touched. Fewer than 4 keep the original static grid. */
+function ReviewSlider({ reviews, products }: { reviews: any[]; products: Product[] }) {
+  const [hold, setHold] = useState(false);
+  const card = (r: any, k: string) => { const pd = products.find(p => p.id === r.product_id); return <div key={k} className="rv-card card bg-white/[.04] p-4">
+    <Stars n={r.rating} /><p className="mt-2 text-sm leading-6 text-white/85">“{r.comment}”</p>
+    <div className="mt-3 flex items-center justify-between gap-2 border-t border-white/10 pt-2 text-xs"><b className="text-gold">{r.author_name}</b>{pd && <span className="truncate text-white/50">{pd.title}</span>}</div></div>; };
+  return <div className="rv-marquee" onTouchStart={() => setHold(true)} onTouchEnd={() => setHold(false)} onTouchCancel={() => setHold(false)}>
+    <div className={`rv-track${hold ? ' rv-hold' : ''}`} style={{ animationDuration: `${Math.max(24, reviews.length * 7)}s` }}>
+      {reviews.map(r => card(r, r.id))}
+      <div className="contents" aria-hidden="true">{reviews.map(r => card(r, 'c' + r.id))}</div>
+    </div></div>;
 }
 export function ReviewModal({ user, products, say, onClose }: { user: any; products: Product[]; say: (s: string) => void; onClose: () => void }) {
   const t = useT();
