@@ -17,6 +17,8 @@ import { captureRef } from "./lib/affiliate";
 import AffiliateDashboard from "./AffiliateDashboard";
 import CallWidget from "./CallWidget";
 import PasswordRecovery from "./PasswordRecovery";
+import PushToggle from "./PushToggle";
+import NoticeBar from "./NoticeBar";
 import { loadCart, stampCart } from "./lib/cartExpiry";
 import { pdfRouteSlug } from "./lib/share";
 
@@ -143,6 +145,7 @@ export default function App() {
   const heroT = dynGroup("hero", { title: { v: site.hero?.title || en["hero.title"], tkey: "hero.title" }, highlight: { v: site.hero?.highlight || en["hero.highlight"], tkey: "hero.highlight" }, text: { v: site.hero?.text || en["hero.text"], tkey: "hero.text" } });
   return (
     <div className="min-h-screen">
+      <NoticeBar notice={site.notice} />
       <header className="sticky top-0 z-30 border-b border-gold/30 bg-navy/95 backdrop-blur">
         <div className="mx-auto flex max-w-[1100px] items-center gap-3 px-4 py-2.5">
           <div className="shrink-0">{site.brand?.logo_url && <img src={site.brand.logo_url} alt="Logo" className="mb-0.5 h-7" />}<div className="text-lg font-extrabold text-gold">{site.brand?.title || "ExamPDF Pro"}</div><div className="hidden text-[11px] text-white/60 sm:block">{dyn("brand.tagline", site.brand?.tagline || en["brand.tagline"], "brand.tagline")}</div></div>
@@ -192,7 +195,7 @@ export default function App() {
             <div><p className="mb-2 font-bold text-gold">{dyn("foot.quick", F.quick_title || en["foot.quick"], "foot.quick")}</p>
               <button className={cl} onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>{t("common.home")}</button>
               <button className={cl} onClick={() => go(null)}>{t("foot.allpdfs")}</button><button className={cl} onClick={() => go(null)}>{t("foot.popular")}</button><PageLinks g="quick" />
-              <button className={cl} onClick={() => setModal({ t: "affiliate" })}>{t("foot.affiliate")}</button><button className={cl} onClick={() => { window.location.hash = "affiliate"; window.location.reload(); }}>{t("foot.affdash")}</button></div>
+              <button className={cl} onClick={() => setModal({ t: "affiliate" })}>{t("foot.affiliate")}</button><button className={cl} onClick={() => { window.location.hash = "affiliate"; window.location.reload(); }}>{t("foot.affdash")}</button><PushToggle cl={cl} say={say} /></div>
             <div><p className="mb-2 font-bold text-gold">{dyn("foot.cats", F.cats_title || en["foot.cats"], "foot.cats")}</p>{footCats.map((c: any) => <button key={c.id} className={cl} onClick={() => go(c.id)}>{cn(c).replace(/ CGL| IBPS/g, "")}</button>)}</div>
             <div><p className="mb-2 font-bold text-gold">{dyn("foot.support", F.support_title || en["foot.support"], "foot.support")}</p>
               {site.contact?.email ? <a className={cl} href={`mailto:${site.contact.email}`}><Mail className="mr-2 inline h-4 w-4" />{t("foot.contact")}</a> : <span className={cl}><Mail className="mr-2 inline h-4 w-4" />{t("foot.contact")}</span>}

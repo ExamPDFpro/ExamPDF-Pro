@@ -12,6 +12,7 @@ import AdminActivity from './AdminActivity';
 import AdminSocial from './AdminSocial';
 import AdminPdfSecurity from './AdminPdfSecurity';
 import AdminCallbacks from './AdminCallbacks';
+import AdminNotify from './AdminNotify';
 import AdminTranslations from './AdminTranslations';
 import MfaChallenge from './MfaChallenge';
 import { useT, useLang, setLang, LANGS } from './i18n';
@@ -31,7 +32,7 @@ const defaults:any={
  social:{}, book:DEFAULT_BOOK, texts:DEFAULT_TEXTS, pages:{items:DEFAULT_PAGES}, theme:{navy:'#0a1633',royal:'#1e4fd8',gold:'#f5c04a',font:'sans',animations:true},
  sections:{order:['best','featured','latest','offers'],hidden:[],titles:{},limits:{},descs:{}}
 };
-const TABS=[['overview','ad.tab.overview',LayoutDashboard],['products','ad.tab.products',BookOpen],['categories','ad.tab.categories',FilePlus2],['design','ad.tab.design',Palette],['payments','ad.tab.payments',ShieldCheck],['reports','ad.tab.reports',LayoutDashboard],['affiliates','ad.tab.affiliates',Eye],['coupons','ad.tab.coupons',Plus],['reviews','ad.tab.reviews',Eye],['pages','ad.tab.pages',FilePlus2],['social','ad.tab.social',Plus],['callbacks','ad.tab.callbacks',Eye],['i18n','ad.tab.i18n',Palette],['staff','ad.tab.staff',ShieldCheck],['activity','ad.tab.activity',Eye],['settings','ad.tab.settings',Settings]] as const;
+const TABS=[['overview','ad.tab.overview',LayoutDashboard],['products','ad.tab.products',BookOpen],['categories','ad.tab.categories',FilePlus2],['design','ad.tab.design',Palette],['payments','ad.tab.payments',ShieldCheck],['reports','ad.tab.reports',LayoutDashboard],['affiliates','ad.tab.affiliates',Eye],['coupons','ad.tab.coupons',Plus],['reviews','ad.tab.reviews',Eye],['pages','ad.tab.pages',FilePlus2],['social','ad.tab.social',Plus],['callbacks','ad.tab.callbacks',Eye],['notify','ad.tab.notify',Eye],['i18n','ad.tab.i18n',Palette],['staff','ad.tab.staff',ShieldCheck],['activity','ad.tab.activity',Eye],['settings','ad.tab.settings',Settings]] as const;
 const safeName=(s:string)=>s.normalize('NFKD').replace(/[^a-zA-Z0-9._-]+/g,'-').replace(/-+/g,'-').slice(-90)||'upload-file';
 export default function Admin(){
  const t=useT(),lang=useLang(),[needMfa,setNeedMfa]=useState(false);
@@ -122,6 +123,7 @@ export default function Admin(){
    {tab==='coupons'&&<AdminCoupons say={say}/>}
    {tab==='social'&&<AdminSocial say={say}/>}
    {tab==='callbacks'&&<AdminCallbacks say={say}/>}
+   {tab==='notify'&&<AdminNotify say={say}/>}
    {tab==='i18n'&&<AdminTranslations say={say}/>}
    {tab==='staff'&&<AdminStaff say={say} myId={user?.id||''}/>}
    {tab==='activity'&&<AdminActivity say={say}/>}

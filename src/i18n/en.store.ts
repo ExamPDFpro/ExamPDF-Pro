@@ -96,4 +96,11 @@ export const enStore = {
   'pw.short': 'Password must be at least 8 characters.',
   'pw.error': 'Could not change the password. Please try again from the email link.',
   'pw.done': 'Password changed ✓ You can now log in.',
+  'push.turnon': 'Get notifications',
+  'push.turnoff': 'Turn off notifications',
+  'push.blocked': 'Notifications blocked in browser',
+  'push.ok': 'Notifications are on. Thank you!',
+  'push.stopped': 'Notifications turned off.',
+  'push.denied': 'Notifications are blocked. Allow them in your browser settings.',
+  'push.error': 'Could not turn on notifications. Please try again.',
 } as const;
