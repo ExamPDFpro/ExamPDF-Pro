@@ -15,7 +15,7 @@ function SamplePage({ page }: { page: number }) {
     <div className="mt-2 border-t border-slate-200 pt-2 text-center text-[7px] text-slate-400">{t('prev.copy')}</div>
   </div>;
 }
-export default function Preview({p,cat,url,owned,brand,onClose,onBuy,onAdd,onDownload}:{p:Product;cat?:string;url:string;owned:boolean;brand?:string;onClose:()=>void;onBuy:()=>void;onAdd:()=>void;onDownload?:()=>void}) {
+export default function Preview({p,cat,url,owned,brand,onClose,onBuy,onAdd,inCart,onViewCart,onDownload}:{p:Product;cat?:string;url:string;owned:boolean;brand?:string;onClose:()=>void;onBuy:()=>void;onAdd:()=>void;inCart?:boolean;onViewCart?:()=>void;onDownload?:()=>void}) {
   const t = useT();
   const [flipped,setFlipped]=useState(false);
   return <div className="preview-overlay fixed inset-0 z-[80] flex items-center justify-center overflow-y-auto bg-[#030816]/85 p-2 backdrop-blur-md sm:p-4" onClick={onClose}>
@@ -32,7 +32,7 @@ export default function Preview({p,cat,url,owned,brand,onClose,onBuy,onAdd,onDow
       <div className="flex items-center justify-center gap-4"><button className="btn-blue !px-3 !py-2 text-xs" onClick={()=>setFlipped(false)} disabled={!flipped}>{t('prev.prev')}</button><span className="text-xs font-semibold text-white/75">{t('prev.page',{n:flipped?2:1})}</span><button className="btn-blue !px-3 !py-2 text-xs" onClick={()=>setFlipped(true)} disabled={flipped}>{t('prev.next')}</button></div>
       {!url&&<p className="mt-2 text-center text-[10px] text-white/45">{t('prev.note')}</p>}
       <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-white/10 pt-3"><b className="text-2xl font-black text-gold">₹{p.selling_price}</b>{p.original_price>p.selling_price&&<s className="text-sm text-white/45">₹{p.original_price}</s>}{p.original_price>p.selling_price&&<span className="rounded-md bg-gold px-2 py-0.5 text-[10px] font-extrabold text-navy">{t('card.off',{n:Math.round((1-p.selling_price/p.original_price)*100)})}</span>}<span className="ml-auto text-[11px] text-[#8be0a4]">{t('prev.saveamt',{n:Math.max(0,p.original_price-p.selling_price)})}</span></div>
-      <div className="mt-3 grid grid-cols-2 gap-3"><button onClick={owned?onDownload:onBuy} className="btn-gold">{owned?t('prev.download'):t('prev.buy')}</button><button onClick={onAdd} className="btn-blue"><ShoppingCart className="mr-1 inline h-4 w-4"/> {t('prev.add')}</button></div>
+      <div className="mt-3 grid grid-cols-2 gap-3"><button onClick={owned?onDownload:onBuy} className="btn-gold">{owned?t('prev.download'):t('prev.buy')}</button><button onClick={inCart&&onViewCart?onViewCart:onAdd} className="btn-blue"><ShoppingCart className="mr-1 inline h-4 w-4"/> {inCart&&onViewCart?t('cart.incart'):t('prev.add')}</button></div>
       <p className="mt-3 text-[11px] leading-5 text-white/50"><ShieldCheck className="mr-1 inline h-4 w-4 text-gold"/><LockKeyhole className="mr-1 inline h-4 w-4 text-gold"/> {t('prev.lock')}</p>
     </div>
   </div>;

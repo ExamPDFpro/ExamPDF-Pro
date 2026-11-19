@@ -3,6 +3,8 @@ import { BookOpen, FileText, Headphones, Heart, Languages, Mail, Search, ShieldC
 import { supabase, PRODUCT_COLS, pub, fnErr, type Product } from "./lib/supabase";
 import Preview from "./Preview";
 import Checkout from "./Checkout";
+import CartPage from "./CartPage";
+import { loadSaved, storeSaved } from "./lib/savedForLater";
 import Hero3D from "./Hero3D";
 import { tilt, untilt } from "./lib/fx";
 import { Auth, Account } from "./Account";
@@ -35,10 +37,10 @@ export default function App() {
   if (window.location.hash === "#affiliate") return <AffiliateDashboard />;
   const [user, setUser] = useState<any>(null), [products, setProducts] = useState<Product[]>([]), [cats, setCats] = useState<any[]>([]);
   const [best, setBest] = useState<string[]>([]), [site, setSite] = useState<Record<string, any>>({}), [owned, setOwned] = useState<string[]>([]);
-  const [cart, setCart] = useState<string[]>(() => loadCart());
+  const [cart, setCart] = useState<string[]>(() => loadCart()), [savedIds, setSavedIds] = useState<string[]>(() => loadSaved()), [toastView, setToastView] = useState(false);
   const [likes, setLikes] = useState<Record<string, number>>({}), [myLikes, setMyLikes] = useState<string[]>([]), [reviews, setReviews] = useState<any[]>([]);
   const [q, setQ] = useState(""), [cat, setCat] = useState<string | null>(null), [modal, setModal] = useState<Modal>(null), [toast, setToast] = useState("");
-  const say = (m: string) => { setToast(m); setTimeout(() => setToast(""), 2800); };
+  const say = (m: string) => { setToast(m); setToastView(false); setTimeout(() => setToast(""), 2800); };
   const t = useT(), lang = useLang(), [loaded, setLoaded] = useState(false), routeSlug = pdfRouteSlug();
 
   useEffect(() => {
@@ -68,6 +70,7 @@ export default function App() {
     if (error) { setMyLikes(on ? [...myLikes, id] : myLikes.filter((x) => x !== id)); setLikes((c) => ({ ...c, [id]: Math.max(0, (c[id] || 0) + (on ? 1 : -1)) })); say(error.message); }
   };
   useEffect(() => { localStorage.setItem("cart", JSON.stringify(cart)); stampCart(cart); }, [cart]);
+  useEffect(() => { storeSaved(savedIds); }, [savedIds]);
 
   useEffect(() => {   // apply admin design settings (colors, font, animations)
     const t = site.theme || {}, st = document.documentElement.style;
@@ -81,7 +84,9 @@ export default function App() {
     if (b.title) document.title = b.title + (b.tagline ? " – " + b.tagline : "");
     if (b.favicon_url) { let l = document.querySelector("link[rel='icon']") as HTMLLinkElement | null; if (!l) { l = document.createElement("link"); l.rel = "icon"; document.head.appendChild(l); } l.href = b.favicon_url; }
   }, [site]);
-  const add = (p: Product) => { if (owned.includes(p.id)) return say(t("cart.owned")); if (cart.includes(p.id)) return say(t("cart.already")); setCart([...cart, p.id]); say(t("cart.added")); };
+  const add = (p: Product) => { if (owned.includes(p.id)) return say(t("cart.owned")); if (cart.includes(p.id)) { say(t("cart.already")); setToastView(true); return; } setCart([...cart, p.id]); setSavedIds((s) => s.filter((x) => x !== p.id)); say(t("cart.added")); setToastView(true); };
+  const saveLater = (id: string) => { setCart((c) => c.filter((x) => x !== id)); setSavedIds((s) => (s.includes(id) ? s : [...s, id])); };
+  const restoreSaved = (id: string) => { setSavedIds((s) => s.filter((x) => x !== id)); if (owned.includes(id)) return say(t("cart.owned")); setCart((c) => (c.includes(id) ? c : [...c, id])); };
   const download = async (p: Product) => { const { data, error } = await supabase.functions.invoke("download-pdf", { body: { product_id: p.id } }); if (error || !data?.url) return say((await fnErr(error, data)) || t("dl.failed")); window.location.href = data.url; };
   const buy = (p: Product) => setModal(user ? { t: "checkout", p } : { t: "auth", p });
   const prods = useMemo(() => products.map((p) => ({ ...p, ...locItem(p as any, ["title", "description"]) }) as Product), [products, lang]);
@@ -215,26 +220,22 @@ export default function App() {
       {cart.length > 0 && <div className="h-20" />}
 
       {m?.t === "preview" && pp && <Preview p={pp} brand={site.brand?.title || "ExamPDF Pro"} cat={(() => { const c = displayCats.find((x) => x.id === pp.category_id); return c ? cn(c) : undefined; })()} url={pp.preview_enabled && pp.preview_pdf_path ? pub("pdf-previews", pp.preview_pdf_path) : ""}
-        owned={owned.includes(pp.id)} onClose={() => setModal(null)} onBuy={() => buy(pp)} onAdd={() => add(pp)} onDownload={() => download(pp)} />}
+        owned={owned.includes(pp.id)} onClose={() => setModal(null)} onBuy={() => buy(pp)} onAdd={() => add(pp)} inCart={cart.includes(pp.id)} onViewCart={() => setModal({ t: "cart" })} onDownload={() => download(pp)} />}
       {m?.t === "review" && user && <ReviewModal user={user} products={prods} say={say} onClose={() => setModal(null)} />}
       {m?.t === "page" && m.page && <div className="fixed inset-0 z-[90] flex items-center justify-center overflow-y-auto bg-black/80 p-3" onClick={() => setModal(null)}><div className="card max-h-[88vh] w-full max-w-2xl overflow-y-auto bg-navy p-5" onClick={(e) => e.stopPropagation()}><div className="mb-3 flex items-center justify-between"><h2 className="text-xl font-bold text-gold">{dyn(`page.${m.page.id}.label`, m.page.label, (("page." + m.page.id) in en ? "page." + m.page.id : undefined) as Key | undefined)}</h2><button onClick={() => setModal(null)} aria-label={t("common.close")}><X /></button></div><div className="whitespace-pre-line text-sm leading-7 text-white/80">{m.page.content?.trim() ? dyn(`page.${m.page.id}.content`, m.page.content) : t("page.soon")}</div></div></div>}
-      {m?.t === "cart" && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-2" onClick={() => setModal(null)}>
-          <div className="card w-full max-w-md bg-navy p-4" onClick={(e) => e.stopPropagation()}>
-            <div className="mb-3 flex justify-between"><h2 className="text-lg font-bold text-gold">{t("cart.title")}</h2><button aria-label={t("common.close")} onClick={() => setModal(null)}><X /></button></div>
-            {cartItems.length === 0 ? <p className="py-4 text-center text-white/60">{t("cart.empty")}</p> : cartItems.map((i) => <div key={i.id} className="flex items-center justify-between border-b border-white/10 py-2"><span className="text-sm">{i.title}</span>
-              <span className="flex items-center gap-2">₹{i.selling_price}<button aria-label={t("cart.remove")} onClick={() => setCart(cart.filter((x) => x !== i.id))}><X className="h-4 w-4" /></button></span></div>)}
-            <button disabled={!cartItems.length} className="btn-gold mt-3 w-full" onClick={() => setModal(user ? { t: "checkout" } : { t: "auth" })}>{t("cart.checkout")}</button>
-          </div></div>)}
+      {m?.t === "cart" && <CartPage items={cartItems} saved={savedIds.map((id) => prods.find((p) => p.id === id)).filter((p): p is Product => !!p && !owned.includes(p.id))}
+        catName={(p) => { const c = displayCats.find((x) => x.id === p.category_id); return c ? cn(c) : t("card.cat"); }}
+        onRemove={(id) => setCart(cart.filter((x) => x !== id))} onSave={saveLater} onRestore={restoreSaved} onRemoveSaved={(id) => setSavedIds((s) => s.filter((x) => x !== id))}
+        onCheckout={() => setModal(user ? { t: "checkout" } : { t: "auth" })} onClose={() => setModal(null)} />}
       {m?.t === "affiliate" && <AffiliateApply onClose={() => setModal(null)} say={say} />}
       {m?.t === "auth" && <Auth onClose={() => setModal(null)} onDone={() => setModal(m.p || cart.length ? { t: "checkout", p: m.p } : null)} />}
-      {m?.t === "checkout" && user && <Checkout items={m.existing ? [] : m.p ? [m.p] : cartItems} existing={m.existing} user={user} say={say} onClose={() => setModal(null)}
+      {m?.t === "checkout" && user && <Checkout items={m.existing ? [] : m.p ? [m.p] : cartItems} existing={m.existing} user={user} say={say} onClose={() => setModal(null)} onOrders={() => setModal({ t: "account" })}
         onDone={() => { if (!m.p && !m.existing) setCart([]); }} />}
       {m?.t === "account" && user && <Account user={user} say={say} onClose={() => setModal(null)} onPay={(o) => setModal({ t: "checkout", existing: o })} />}
       {cart.length > 0 && !modal && <div className="fixed bottom-4 left-1/2 z-40 flex -translate-x-1/2 items-center gap-3 whitespace-nowrap rounded-2xl border border-gold/30 bg-navy/90 py-2 pl-4 pr-2 shadow-2xl backdrop-blur"><span>🛒 <b>{t("cart.items", { n: cartItems.length })}</b> • <b className="text-gold">₹{cartItems.reduce((s, p) => s + Number(p.selling_price), 0)}</b></span><button className="btn-gold !py-2" onClick={() => setModal(user ? { t: "checkout" } : { t: "auth" })}>{t("cart.checkout")}</button></div>}
       <PasswordRecovery />
       {!modal && <CallWidget phone={site.contact?.phone} lift={cart.length > 0} />}
-      {toast && <div className="fixed bottom-4 left-1/2 z-[60] -translate-x-1/2 rounded-full bg-gold px-4 py-2 font-semibold text-navy shadow-xl">{toast}</div>}
+      {toast && <div className="fixed bottom-4 left-1/2 z-[95] flex -translate-x-1/2 items-center gap-3 whitespace-nowrap rounded-full bg-gold px-4 py-2 font-semibold text-navy shadow-xl">{toast}{toastView && <button className="rounded-full bg-navy px-3 py-0.5 text-xs font-bold text-gold" onClick={() => { setToast(""); setToastView(false); setModal({ t: "cart" }); }}>{t("cart.view")}</button>}</div>}
     </div>
   );
 }
