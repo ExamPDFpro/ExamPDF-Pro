@@ -37,10 +37,10 @@ export default function App() {
   if (window.location.hash === "#affiliate") return <AffiliateDashboard />;
   const [user, setUser] = useState<any>(null), [products, setProducts] = useState<Product[]>([]), [cats, setCats] = useState<any[]>([]);
   const [best, setBest] = useState<string[]>([]), [site, setSite] = useState<Record<string, any>>({}), [owned, setOwned] = useState<string[]>([]);
-  const [cart, setCart] = useState<string[]>(() => loadCart()), [savedIds, setSavedIds] = useState<string[]>(() => loadSaved()), [toastView, setToastView] = useState(false);
+  const [cart, setCart] = useState<string[]>(() => loadCart()), [savedIds, setSavedIds] = useState<string[]>(() => loadSaved());
   const [likes, setLikes] = useState<Record<string, number>>({}), [myLikes, setMyLikes] = useState<string[]>([]), [reviews, setReviews] = useState<any[]>([]);
   const [q, setQ] = useState(""), [cat, setCat] = useState<string | null>(null), [modal, setModal] = useState<Modal>(null), [toast, setToast] = useState("");
-  const say = (m: string) => { setToast(m); setToastView(false); setTimeout(() => setToast(""), 2800); };
+  const say = (m: string) => { setToast(m); setTimeout(() => setToast(""), 2800); };
   const t = useT(), lang = useLang(), [loaded, setLoaded] = useState(false), routeSlug = pdfRouteSlug();
 
   useEffect(() => {
@@ -84,7 +84,8 @@ export default function App() {
     if (b.title) document.title = b.title + (b.tagline ? " – " + b.tagline : "");
     if (b.favicon_url) { let l = document.querySelector("link[rel='icon']") as HTMLLinkElement | null; if (!l) { l = document.createElement("link"); l.rel = "icon"; document.head.appendChild(l); } l.href = b.favicon_url; }
   }, [site]);
-  const add = (p: Product) => { if (owned.includes(p.id)) return say(t("cart.owned")); if (cart.includes(p.id)) { say(t("cart.already")); setToastView(true); return; } setCart([...cart, p.id]); setSavedIds((s) => s.filter((x) => x !== p.id)); say(t("cart.added")); setToastView(true); };
+  // Add to Cart opens the full-screen Cart page straight away (no sticky bar on browsing pages).
+  const add = (p: Product) => { if (owned.includes(p.id)) return say(t("cart.owned")); if (!cart.includes(p.id)) { setCart([...cart, p.id]); setSavedIds((s) => s.filter((x) => x !== p.id)); } setModal({ t: "cart" }); };
   const saveLater = (id: string) => { setCart((c) => c.filter((x) => x !== id)); setSavedIds((s) => (s.includes(id) ? s : [...s, id])); };
   const restoreSaved = (id: string) => { setSavedIds((s) => s.filter((x) => x !== id)); if (owned.includes(id)) return say(t("cart.owned")); setCart((c) => (c.includes(id) ? c : [...c, id])); };
   const download = async (p: Product) => { const { data, error } = await supabase.functions.invoke("download-pdf", { body: { product_id: p.id } }); if (error || !data?.url) return say((await fnErr(error, data)) || t("dl.failed")); window.location.href = data.url; };
@@ -179,7 +180,7 @@ export default function App() {
       </>}
 
       {!T.reviews_hidden && !filtering && !routeSlug && <ReviewsSection T={T} reviews={reviews} products={prods} onWrite={() => (user ? setModal({ t: "review" }) : setModal({ t: "auth" }))} />}
-      <footer className="site-footer mt-10 border-t border-gold/30 px-4 pt-8 text-sm text-white/60">
+      <footer className="site-footer mt-10 border-t border-gold/30 px-4 pt-8 text-sm text-white/60 max-md:pb-14">
         {(() => {
           const go = (c: string | null) => { if (routeSlug) { history.replaceState(null, "", location.pathname + location.search); location.reload(); return; } setCat(c); document.getElementById("secs")?.scrollIntoView({ behavior: "smooth" }); };
           const cl = "block py-1 text-left hover:text-gold";
@@ -232,10 +233,9 @@ export default function App() {
       {m?.t === "checkout" && user && <Checkout items={m.existing ? [] : m.p ? [m.p] : cartItems} existing={m.existing} user={user} say={say} onClose={() => setModal(null)} onOrders={() => setModal({ t: "account" })}
         onDone={() => { if (!m.p && !m.existing) setCart([]); }} />}
       {m?.t === "account" && user && <Account user={user} say={say} onClose={() => setModal(null)} onPay={(o) => setModal({ t: "checkout", existing: o })} />}
-      {cart.length > 0 && !modal && <div className="fixed bottom-4 left-1/2 z-40 flex -translate-x-1/2 items-center gap-3 whitespace-nowrap rounded-2xl border border-gold/30 bg-navy/90 py-2 pl-4 pr-2 shadow-2xl backdrop-blur"><span>🛒 <b>{t("cart.items", { n: cartItems.length })}</b> • <b className="text-gold">₹{cartItems.reduce((s, p) => s + Number(p.selling_price), 0)}</b></span><button className="btn-gold !py-2" onClick={() => setModal(user ? { t: "checkout" } : { t: "auth" })}>{t("cart.checkout")}</button></div>}
       <PasswordRecovery />
-      {!modal && <CallWidget phone={site.contact?.phone} lift={cart.length > 0} />}
-      {toast && <div className="fixed bottom-4 left-1/2 z-[95] flex -translate-x-1/2 items-center gap-3 whitespace-nowrap rounded-full bg-gold px-4 py-2 font-semibold text-navy shadow-xl">{toast}{toastView && <button className="rounded-full bg-navy px-3 py-0.5 text-xs font-bold text-gold" onClick={() => { setToast(""); setToastView(false); setModal({ t: "cart" }); }}>{t("cart.view")}</button>}</div>}
+      <CallWidget phone={site.contact?.phone} hide={!!modal} />
+      {toast && <div className="fixed bottom-24 left-1/2 z-[95] -translate-x-1/2 whitespace-nowrap rounded-full bg-gold md:bottom-4 px-4 py-2 font-semibold text-navy shadow-xl">{toast}</div>}
     </div>
   );
 }

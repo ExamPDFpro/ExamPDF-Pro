@@ -9,7 +9,8 @@ type Quote={subtotal:number;discount:number;total:number;coupon_code?:string|nul
 const fld='mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 outline-none focus:border-navy';
 export default function Checkout({items,existing,user,say,onClose,onDone,onOrders}:{items:Product[];existing?:Order;user:any;say:(s:string)=>void;onClose:()=>void;onDone:()=>void;onOrders?:()=>void}){
  const t=useT();
- const lock=useRef(false),sub=useRef<any>(null),[done,setDone]=useState<{id:string;amount:number}|null>(null);
+ const lock=useRef(false),sub=useRef<any>(null),[done,setDone]=useState<{id:string;amount:number}|null>(null),[fail,setFail]=useState(''),failRef=useRef<HTMLDivElement>(null);
+ useEffect(()=>{if(fail)failRef.current?.scrollIntoView({behavior:'smooth',block:'center'})},[fail]);
  const [utr,setUtr]=useState(''),[file,setFile]=useState<File|null>(null),[busy,setBusy]=useState(false);
  const [pay,setPay]=useState<any>({}),[code,setCode]=useState(''),[applied,setApplied]=useState(''),[quote,setQuote]=useState<Quote|null>(null),[cpMsg,setCpMsg]=useState(''),[checking,setChecking]=useState(false);
  const ids=items.map(p=>p.id),idsKey=ids.join(',');
@@ -31,7 +32,7 @@ export default function Checkout({items,existing,user,say,onClose,onDone,onOrder
  const total=existing?.total??quote?.total??sum;
  const hasPay=!!(pay.upi_id||pay.qr_url||pay.account_number);
  // Duplicate-click lock + safe retry: once the server has created the order we keep its answer and, on a retry, only the screenshot upload is repeated (no second order).
- async function submit(){if(lock.current)return;if(!isSupabaseConfigured){say(t('co.needsetup'));return;}if(!file||!utr.trim()){say(t('co.need'));return;}if(file.size>MAX_PROOF_BYTES){say(t('co.toolarge'));return;}lock.current=true;setBusy(true);try{
+ async function submit(){if(lock.current)return;if(!isSupabaseConfigured){say(t('co.needsetup'));return;}if(!file||!utr.trim()){say(t('co.need'));return;}if(file.size>MAX_PROOF_BYTES){say(t('co.toolarge'));return;}lock.current=true;setBusy(true);setFail('');try{
   // Payment submissions are processed by a server-side Edge Function: it re-prices the order and records the UTR.
   let data=sub.current;
   if(!data){const r=await supabase.functions.invoke('submit-payment',{body:{order_id:existing?.id,product_ids:ids,payment_reference:utr.trim(),coupon_code:applied||undefined,ref:getRef()||undefined}});
@@ -41,22 +42,35 @@ export default function Checkout({items,existing,user,say,onClose,onDone,onOrder
   const up=await supabase.storage.from('payment-proofs').upload(data.upload_path,proof,{upsert:false,contentType:proof.type||undefined});
   if(up.error&&!/exist|duplicate/i.test(up.error.message||''))throw Object.assign(new Error(t('shop.retry')),{retry:true});
   setDone({id:String(data.order_id||existing?.id||''),amount:total});onDone();
- }catch(e:any){say(e?.retry?e.message:(e.message||t('co.fail')));}finally{lock.current=false;setBusy(false)}}
+ }catch(e:any){const m=e?.retry?e.message:(e.message||t('co.fail'));setFail(m);say(m);}finally{lock.current=false;setBusy(false)}}
  const card='rounded-xl border border-slate-200 bg-white p-4 shadow-sm',h='mb-3 text-sm font-bold uppercase tracking-wide text-slate-500';
  if(done)return <div className="fixed inset-0 z-[90] overflow-y-auto bg-slate-100 p-3 text-slate-900"><div className="mx-auto mt-10 max-w-md rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
   <CheckCircle2 className="mx-auto h-14 w-14 text-green-600"/><h2 className="mt-3 text-xl font-black">{t('shop.ok.title')}</h2><p className="mt-2 text-sm text-slate-600">{t('shop.ok.text')}</p>
   <div className="mt-4 rounded-lg bg-slate-50 p-3 text-sm">{done.id&&<p className="flex justify-between"><span className="text-slate-500">{t('shop.ok.order')}</span><b>#{done.id.slice(0,8)}</b></p>}<p className="mt-1 flex justify-between"><span className="text-slate-500">{t('shop.ok.amount')}</span><b>₹{done.amount}</b></p></div>
   <div className="mt-5 flex flex-col gap-2">{onOrders&&<button className="btn-gold" onClick={onOrders}>{t('shop.ok.orders')}</button>}<button className="btn-blue" onClick={onClose}>{t('shop.ok.close')}</button></div></div></div>;
  const orig=(p:Product)=>Math.max(Number(p.original_price)||0,Number(p.selling_price)||0);
+ // Copy buttons + "Pay via UPI App" (UPI intent). The amount comes from the same server-priced total shown on this page; opening a UPI app proves nothing, so the PDF stays locked until Admin approves.
+ const copy=async(v:string)=>{try{await navigator.clipboard.writeText(v);say(t('pay.copied'));}catch{say(t('pay.copyfail'));}};
+ const upiOk=/^[\w.\-]{2,}@[\w.\-]{2,}$/.test(String(pay.upi_id||''))&&Number.isFinite(Number(total))&&Number(total)>0;
+ const upiLink=upiOk?`upi://pay?pa=${encodeURIComponent(pay.upi_id)}${pay.payee_name?`&pn=${encodeURIComponent(pay.payee_name)}`:''}&am=${Number(total).toFixed(2)}&cu=INR&tn=${encodeURIComponent('ExamPDF Pro order')}`:'';
+ const cb='shrink-0 rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-bold text-navy active:bg-slate-100';
  const Pay=<div className={card}><h3 className={h}>{t('shop.sec.payment')}</h3>
-  {hasPay?<div className="text-sm text-slate-700"><p className="mb-3 text-xs text-slate-500">{t('shop.payhint')}</p><p className="mb-2 font-semibold text-navy">{t('co.payto')}</p>{pay.qr_url&&<img src={pay.qr_url} alt="Payment QR" className="mx-auto mb-3 h-44 w-44 rounded-lg border border-slate-200 bg-white object-contain p-1"/>}{pay.upi_id&&<p>{t('co.upi')}: <b className="select-all">{pay.upi_id}</b>{pay.payee_name?` (${pay.payee_name})`:''}</p>}{pay.account_number&&<div className="mt-2 rounded-lg bg-slate-50 p-3"><p>{t('co.bank')}: {pay.bank_name}</p><p>{t('co.acname')}: {pay.account_name}</p><p>{t('co.acno')}: <b className="select-all">{pay.account_number}</b></p><p>{t('co.ifsc')}: <b className="select-all">{pay.ifsc}</b></p></div>}{pay.note&&<p className="mt-2 text-xs text-slate-500">{pay.note}</p>}<p className="mt-2 text-xs text-slate-500">{t('co.after')}</p></div>:<p className="text-sm text-slate-500">{t('shop.nopay')}</p>}
+  <ol className="mb-3 space-y-1.5 rounded-lg bg-slate-50 p-3 text-xs text-slate-600">{(['pay.step1','pay.step2','pay.step3'] as const).map((k,i)=><li key={k} className="flex gap-2"><b className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-navy text-[11px] text-gold">{i+1}</b><span>{t(k)}</span></li>)}</ol>
+  {hasPay?<div className="text-sm text-slate-700"><p className="mb-2 font-semibold text-navy">{t('co.payto')}</p>
+   <p className="mb-2 flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2"><span>{t('shop.payamt')}</span><b className="text-lg text-navy">₹{total}</b></p>
+   {upiLink&&<div className="mb-3 md:hidden"><a href={upiLink} className="btn-gold block w-full text-center">{t('pay.upibtn')}</a><p className="mt-1.5 text-[11px] text-slate-500">{t('pay.upifallback')}</p></div>}
+   {pay.qr_url&&<img src={pay.qr_url} alt="Payment QR" className="mx-auto mb-3 h-44 w-44 rounded-lg border border-slate-200 bg-white object-contain p-1"/>}
+   {pay.upi_id&&<div className="flex items-center justify-between gap-2"><p className="min-w-0 break-all">{t('co.upi')}: <b className="select-all">{pay.upi_id}</b>{pay.payee_name?` (${pay.payee_name})`:''}</p><button type="button" className={cb} onClick={()=>copy(String(pay.upi_id))}>{t('pay.copyupi')}</button></div>}
+   {pay.account_number&&<div className="mt-2 rounded-lg bg-slate-50 p-3"><p>{t('co.bank')}: {pay.bank_name}</p><p>{t('co.acname')}: {pay.account_name}</p><div className="flex items-center justify-between gap-2"><p className="min-w-0 break-all">{t('co.acno')}: <b className="select-all">{pay.account_number}</b></p><button type="button" className={cb} onClick={()=>copy(String(pay.account_number))}>{t('pay.copyacno')}</button></div><p>{t('co.ifsc')}: <b className="select-all">{pay.ifsc}</b></p></div>}{pay.note&&<p className="mt-2 text-xs text-slate-500">{pay.note}</p>}<p className="mt-2 text-xs text-slate-500">{t('co.after')}</p></div>:<p className="text-sm text-slate-500">{t('shop.nopay')}</p>}
   <label className="mt-4 block text-sm font-medium">{t('co.utr')}<input value={utr} onChange={e=>setUtr(e.target.value)} className={fld} placeholder={t('co.utrph')}/></label>
   <label className="mt-4 block text-sm font-medium">{t('co.shot')}<input type="file" accept="image/png,image/jpeg,image/webp,application/pdf" onChange={e=>{const f=e.target.files?.[0]||null;if(f&&f.size>MAX_PROOF_BYTES){say(t('co.toolarge'));e.target.value='';setFile(null);return;}setFile(f);}} className="mt-2 block w-full text-sm text-slate-600"/><span className="mt-1 block text-xs text-slate-400">{t('co.shotnote')}</span></label></div>;
- const Btn=<button disabled={busy} onClick={submit} className="btn-gold w-full disabled:opacity-50">{busy?t('co.submitting'):<><Upload className="mr-2 inline h-4 w-4"/> {t('co.submit')}</>}</button>;
+ const Fail=fail?<div ref={failRef} role="alert" className="mb-3 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800"><b className="block">{t('pay.failtitle')}</b>{fail}<span className="mt-1 block text-xs">{t('pay.failhint')}</span></div>:null;
+ const Btn=<button disabled={busy} onClick={submit} className="btn-gold w-full disabled:opacity-50">{busy?t('co.submitting'):fail?t('pay.retry'):<><Upload className="mr-2 inline h-4 w-4"/> {t('co.submit')}</>}</button>;
  return <div className="fixed inset-0 z-[90] overflow-y-auto bg-slate-100 text-slate-900">
   <div className="sticky top-0 z-10 border-b border-gold/30 bg-navy text-white shadow"><div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-3 py-3"><button className="flex items-center gap-2 text-sm font-semibold" onClick={onClose}><ArrowLeft className="h-5 w-5"/>{t('shop.back')}</button><div className="text-center"><span className="block text-[10px] uppercase tracking-widest text-gold">{t('co.secure')}</span><h2 className="text-base font-bold">{t('co.title')}</h2></div><button onClick={onClose} aria-label={t('common.close')}><X/></button></div></div>
   <div className="mx-auto max-w-5xl px-3 pb-28 pt-4 lg:grid lg:grid-cols-[1fr_340px] lg:items-start lg:gap-5 lg:pb-10">
    <div className="space-y-3">
+    {Fail}
     <div className={card}><h3 className={h}>{t('shop.sec.review')}</h3>
      {existing?<p className="text-sm text-slate-700">{t('shop.existing')} · #{String(existing.id).slice(0,8)}</p>:items.map(p=><div key={p.id} className="flex items-center gap-3 border-b border-slate-100 py-2 last:border-0">
       <div className="h-14 w-10 shrink-0 overflow-hidden rounded bg-navy">{p.cover_url&&<img src={p.cover_url} alt="" className="h-full w-full object-cover"/>}</div>
