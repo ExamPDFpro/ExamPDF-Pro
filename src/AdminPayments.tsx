@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from './lib/supabase';
 import { useT } from './i18n';
+import { PAY_METHODS, isOn, type PayMethod } from './lib/payMethods';
 const input = 'w-full rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-sm';
 const label = 'mb-1 block text-xs text-white/60';
 const fields: [string, any][] = [['upi_id', 'ad.pay.upi'], ['payee_name', 'ad.pay.payee'], ['bank_name', 'ad.pay.bank'], ['account_name', 'ad.pay.acname'], ['account_number', 'ad.pay.acno'], ['ifsc', 'ad.pay.ifsc']];
@@ -36,6 +37,8 @@ export default function AdminPayments({ say }: { say: (s: string) => void }) {
       <div className="grid gap-3 sm:grid-cols-2">{fields.map(([k, tk]) => <label key={k}><span className={label}>{t(tk)}</span><input className={input} value={pay[k] || ''} onChange={e => setPay({ ...pay, [k]: e.target.value })} /></label>)}
         <label className="sm:col-span-2"><span className={label}>{t('ad.pay.note')}</span><input className={input} value={pay.note || ''} onChange={e => setPay({ ...pay, note: e.target.value })} /></label>
         <label className="sm:col-span-2"><span className={label}>{t('ad.pay.qr')}</span>{pay.qr_url && <img src={pay.qr_url} alt="QR" className="mb-2 h-28 w-28 rounded bg-white object-contain p-1" />}<input type="file" accept="image/*" onChange={e => setQr(e.target.files?.[0] || null)} className="block text-sm text-white/70" /></label></div>
+      <div className="mt-5 rounded-lg border border-white/10 p-3"><h4 className="mb-1 text-sm font-bold text-gold">{t('ad.pm.title')}</h4><p className="mb-3 text-xs text-white/55">{t('ad.pm.help')}</p>
+        <div className="grid gap-2 sm:grid-cols-2">{PAY_METHODS.map((m: PayMethod) => { const on = isOn(pay, m); const missing = (m === 'qr' && !pay.qr_url) || (m === 'bank' && !pay.account_number) || (m !== 'qr' && m !== 'bank' && !pay.upi_id); return <label key={m} className="flex items-center justify-between gap-3 rounded-lg bg-white/5 px-3 py-2 text-sm"><span>{t(('ad.pm.' + m) as any)}{missing && <span className="block text-[11px] text-amber-300">{t('ad.pm.missing')}</span>}</span><input type="checkbox" role="switch" aria-label={t(('ad.pm.' + m) as any)} checked={on} onChange={e => setPay({ ...pay, methods: { ...(pay.methods || {}), [m]: e.target.checked } })} className="h-5 w-5 accent-yellow-400" /></label>; })}</div></div>
       <button className="btn-gold mt-4" disabled={busy} onClick={savePay}>{t('ad.pay.save')}</button></div>
     <div className="admin-panel p-4"><div className="mb-3 flex flex-wrap items-center gap-2"><h3 className="mr-auto font-bold text-gold">{t('ad.pay.requests')}</h3>{[['pending', 'ad.pay.f_pending'], ['all', 'ad.pay.f_all']].map(([f, k]) => <button key={f} onClick={() => setFilter(f)} className={`rounded-full border px-3 py-1 text-xs ${filter === f ? 'border-gold bg-gold text-navy' : 'border-white/15 text-white/70'}`}>{t(k as any)}</button>)}</div>
       {shown.length === 0 && <p className="py-6 text-center text-sm text-white/50">{t('ad.pay.none')}</p>}

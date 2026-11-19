@@ -113,6 +113,7 @@ export const hiStore: Record<keyof typeof enStore, string> = {
   'pay.step1': 'UPI या बैंक ट्रांसफर से सही ऑर्डर राशि भेजें।',
   'pay.step2': 'अपना UTR / ट्रांज़ैक्शन नंबर कॉपी करें और पेमेंट का स्क्रीनशॉट अपलोड करें।',
   'pay.step3': 'पेमेंट विवरण जमा करें और Admin सत्यापन की प्रतीक्षा करें।',
+  'pay.apps': 'या ऐप से भुगतान करें:',
   'pay.upibtn': 'UPI ऐप से भुगतान करें',
   'pay.upifallback': 'कोई UPI ऐप न खुले तो नीचे QR स्कैन करें या UPI ID कॉपी करें। ऐप खुलने से भुगतान की पुष्टि नहीं होती।',
   'pay.copyupi': 'UPI ID कॉपी',

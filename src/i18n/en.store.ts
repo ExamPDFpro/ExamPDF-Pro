@@ -113,6 +113,7 @@ export const enStore = {
   'pay.step1': 'Pay the exact order amount using UPI or bank transfer.',
   'pay.step2': 'Copy your UTR / transaction reference number and upload the payment screenshot.',
   'pay.step3': 'Submit your payment details and wait for Admin verification.',
+  'pay.apps': 'Or pay with an app:',
   'pay.upibtn': 'Pay via UPI App',
   'pay.upifallback': 'If no UPI app opens, scan the QR code or copy the UPI ID below. Opening an app does not confirm your payment.',
   'pay.copyupi': 'Copy UPI ID',
