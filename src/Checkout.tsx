@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { X, ShieldCheck, Upload, AlertCircle, CheckCircle2, ArrowLeft } from 'lucide-react';
 import { isSupabaseConfigured, supabase, fnErr, type Product } from './lib/supabase';
+import { isOn, APP_METHODS, appLink } from './lib/payMethods';
 import { getRef } from './lib/affiliate';
 import { compressProof, MAX_PROOF_BYTES } from './lib/compress';
 import { useT, en, type Key } from './i18n';
@@ -30,7 +31,10 @@ export default function Checkout({items,existing,user,say,onClose,onDone,onOrder
  function removeCoupon(){setApplied('');setCode('');setCpMsg('');}
  const sum=items.reduce((s,p)=>s+Number(p.selling_price),0);
  const total=existing?.total??quote?.total??sum;
- const hasPay=!!(pay.upi_id||pay.qr_url||pay.account_number);
+ const showQr=isOn(pay,'qr')&&!!pay.qr_url, showBank=isOn(pay,'bank')&&!!pay.account_number;
+ const appsOn=APP_METHODS.filter(m=>isOn(pay,m));
+ const showUpiId=!!pay.upi_id&&(isOn(pay,'upi')||appsOn.length>0);
+ const hasPay=showQr||showBank||showUpiId;
  // Duplicate-click lock + safe retry: once the server has created the order we keep its answer and, on a retry, only the screenshot upload is repeated (no second order).
  async function submit(){if(lock.current)return;if(!isSupabaseConfigured){say(t('co.needsetup'));return;}if(!file||!utr.trim()){say(t('co.need'));return;}if(file.size>MAX_PROOF_BYTES){say(t('co.toolarge'));return;}lock.current=true;setBusy(true);setFail('');try{
   // Payment submissions are processed by a server-side Edge Function: it re-prices the order and records the UTR.
@@ -52,16 +56,19 @@ export default function Checkout({items,existing,user,say,onClose,onDone,onOrder
  // Copy buttons + "Pay via UPI App" (UPI intent). The amount comes from the same server-priced total shown on this page; opening a UPI app proves nothing, so the PDF stays locked until Admin approves.
  const copy=async(v:string)=>{try{await navigator.clipboard.writeText(v);say(t('pay.copied'));}catch{say(t('pay.copyfail'));}};
  const upiOk=/^[\w.\-]{2,}@[\w.\-]{2,}$/.test(String(pay.upi_id||''))&&Number.isFinite(Number(total))&&Number(total)>0;
- const upiLink=upiOk?`upi://pay?pa=${encodeURIComponent(pay.upi_id)}${pay.payee_name?`&pn=${encodeURIComponent(pay.payee_name)}`:''}&am=${Number(total).toFixed(2)}&cu=INR&tn=${encodeURIComponent('ExamPDF Pro order')}`:'';
+ const upiQuery=upiOk?`pa=${encodeURIComponent(pay.upi_id)}${pay.payee_name?`&pn=${encodeURIComponent(pay.payee_name)}`:''}&am=${Number(total).toFixed(2)}&cu=INR&tn=${encodeURIComponent('ExamPDF Pro order')}`:'';
+ const upiLink=upiOk&&isOn(pay,'upi')?`upi://pay?${upiQuery}`:'';
+ const appNames:Record<string,string>={phonepe:'PhonePe',paytm:'Paytm',gpay:'Google Pay'};
  const cb='shrink-0 rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-bold text-navy active:bg-slate-100';
  const Pay=<div className={card}><h3 className={h}>{t('shop.sec.payment')}</h3>
   <ol className="mb-3 space-y-1.5 rounded-lg bg-slate-50 p-3 text-xs text-slate-600">{(['pay.step1','pay.step2','pay.step3'] as const).map((k,i)=><li key={k} className="flex gap-2"><b className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-navy text-[11px] text-gold">{i+1}</b><span>{t(k)}</span></li>)}</ol>
   {hasPay?<div className="text-sm text-slate-700"><p className="mb-2 font-semibold text-navy">{t('co.payto')}</p>
    <p className="mb-2 flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2"><span>{t('shop.payamt')}</span><b className="text-lg text-navy">₹{total}</b></p>
    {upiLink&&<div className="mb-3 md:hidden"><a href={upiLink} className="btn-gold block w-full text-center">{t('pay.upibtn')}</a><p className="mt-1.5 text-[11px] text-slate-500">{t('pay.upifallback')}</p></div>}
-   {pay.qr_url&&<img src={pay.qr_url} alt="Payment QR" className="mx-auto mb-3 h-44 w-44 rounded-lg border border-slate-200 bg-white object-contain p-1"/>}
-   {pay.upi_id&&<div className="flex items-center justify-between gap-2"><p className="min-w-0 break-all">{t('co.upi')}: <b className="select-all">{pay.upi_id}</b>{pay.payee_name?` (${pay.payee_name})`:''}</p><button type="button" className={cb} onClick={()=>copy(String(pay.upi_id))}>{t('pay.copyupi')}</button></div>}
-   {pay.account_number&&<div className="mt-2 rounded-lg bg-slate-50 p-3"><p>{t('co.bank')}: {pay.bank_name}</p><p>{t('co.acname')}: {pay.account_name}</p><div className="flex items-center justify-between gap-2"><p className="min-w-0 break-all">{t('co.acno')}: <b className="select-all">{pay.account_number}</b></p><button type="button" className={cb} onClick={()=>copy(String(pay.account_number))}>{t('pay.copyacno')}</button></div><p>{t('co.ifsc')}: <b className="select-all">{pay.ifsc}</b></p></div>}{pay.note&&<p className="mt-2 text-xs text-slate-500">{pay.note}</p>}<p className="mt-2 text-xs text-slate-500">{t('co.after')}</p></div>:<p className="text-sm text-slate-500">{t('shop.nopay')}</p>}
+   {showQr&&<img src={pay.qr_url} alt="Payment QR" className="mx-auto mb-3 h-44 w-44 rounded-lg border border-slate-200 bg-white object-contain p-1"/>}
+   {upiOk&&appsOn.length>0&&<div className="mb-3 md:hidden"><p className="mb-1.5 text-xs text-slate-500">{t('pay.apps')}</p><div className="grid grid-cols-3 gap-2">{appsOn.map(m=><a key={m} href={appLink(m,upiQuery)} className="rounded-lg border border-navy px-2 py-2 text-center text-xs font-bold text-navy active:bg-slate-100">{appNames[m]}</a>)}</div></div>}
+   {showUpiId&&<div className="flex items-center justify-between gap-2"><p className="min-w-0 break-all">{t('co.upi')}: <b className="select-all">{pay.upi_id}</b>{pay.payee_name?` (${pay.payee_name})`:''}</p><button type="button" className={cb} onClick={()=>copy(String(pay.upi_id))}>{t('pay.copyupi')}</button></div>}
+   {showBank&&<div className="mt-2 rounded-lg bg-slate-50 p-3"><p>{t('co.bank')}: {pay.bank_name}</p><p>{t('co.acname')}: {pay.account_name}</p><div className="flex items-center justify-between gap-2"><p className="min-w-0 break-all">{t('co.acno')}: <b className="select-all">{pay.account_number}</b></p><button type="button" className={cb} onClick={()=>copy(String(pay.account_number))}>{t('pay.copyacno')}</button></div><p>{t('co.ifsc')}: <b className="select-all">{pay.ifsc}</b></p></div>}{pay.note&&<p className="mt-2 text-xs text-slate-500">{pay.note}</p>}<p className="mt-2 text-xs text-slate-500">{t('co.after')}</p></div>:<p className="text-sm text-slate-500">{t('shop.nopay')}</p>}
   <label className="mt-4 block text-sm font-medium">{t('co.utr')}<input value={utr} onChange={e=>setUtr(e.target.value)} className={fld} placeholder={t('co.utrph')}/></label>
   <label className="mt-4 block text-sm font-medium">{t('co.shot')}<input type="file" accept="image/png,image/jpeg,image/webp,application/pdf" onChange={e=>{const f=e.target.files?.[0]||null;if(f&&f.size>MAX_PROOF_BYTES){say(t('co.toolarge'));e.target.value='';setFile(null);return;}setFile(f);}} className="mt-2 block w-full text-sm text-slate-600"/><span className="mt-1 block text-xs text-slate-400">{t('co.shotnote')}</span></label></div>;
  const Fail=fail?<div ref={failRef} role="alert" className="mb-3 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800"><b className="block">{t('pay.failtitle')}</b>{fail}<span className="mt-1 block text-xs">{t('pay.failhint')}</span></div>:null;
