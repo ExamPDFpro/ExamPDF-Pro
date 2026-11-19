@@ -285,4 +285,11 @@ export const enAdmin = {
   "ad.save": "Save",
   "ad.delete": "Delete",
   "ad.lang": "Language",
+  "ad.pv.rule": "Preview PDF must have exactly 2 pages (Cover + Sample Content). It is public, so never upload the full PDF here.",
+  "ad.pv.checking": "Checking the PDF…",
+  "ad.pv.ok": "✓ 2 pages: this Preview PDF is OK.",
+  "ad.pv.fewer": "Blocked: this PDF has only {n} page(s). The Preview PDF must have exactly 2 pages (Cover + Sample Content).",
+  "ad.pv.more": "Blocked: this PDF has {n} pages. The Preview PDF must have exactly 2 pages (Cover + Sample Content). Do not upload the full PDF here: this file is public.",
+  "ad.pv.unreadable": "Blocked: the PDF could not be read (corrupted, password-protected or not a PDF), so its pages could not be verified. Please upload a valid 2-page PDF.",
+  "ad.pv.notverified": "The Preview PDF has not been verified as exactly 2 pages. Please choose the file again.",
 } as const;
