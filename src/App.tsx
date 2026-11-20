@@ -235,7 +235,7 @@ export default function App() {
       {m?.t === "account" && user && <Account user={user} say={say} onClose={() => setModal(null)} onPay={(o) => setModal({ t: "checkout", existing: o })} />}
       <PasswordRecovery />
       <CallWidget phone={site.contact?.phone} hide={!!modal} />
-      {toast && <div className="fixed bottom-24 left-1/2 z-[95] -translate-x-1/2 whitespace-nowrap rounded-full bg-gold md:bottom-4 px-4 py-2 font-semibold text-navy shadow-xl">{toast}</div>}
+      {toast && <div className="fixed bottom-24 left-1/2 z-[95] -translate-x-1/2 w-max max-w-[92vw] rounded-2xl text-center text-sm bg-gold lg:bottom-4 px-4 py-2 font-semibold text-navy shadow-xl">{toast}</div>}
     </div>
   );
 }
