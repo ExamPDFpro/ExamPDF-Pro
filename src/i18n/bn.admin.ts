@@ -121,6 +121,7 @@ export const bnAdmin: Record<keyof typeof enAdmin, string> = {
   "ad.pm.paytm": "Paytm",
   "ad.pm.gpay": "Google Pay",
   "ad.pm.missing": "ওপরে তথ্য দেওয়া নেই, তাই কিছু দেখাবে না",
+  "ad.pm.needupi": "আগে ওপরে আপনার UPI ID দিন। UPI ID ছাড়া UPI, PhonePe, Paytm ও Google Pay বাটন কাজ করে না, তাই customer-কে দেখাবে না।",
   "ad.pay.save": "পেমেন্টের তথ্য সংরক্ষণ করুন",
   "ad.pay.requests": "পেমেন্টের অনুরোধ",
   "ad.pay.shot": "স্ক্রিনশট দেখুন",
