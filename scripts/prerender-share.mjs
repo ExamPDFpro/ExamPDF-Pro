@@ -3,7 +3,7 @@
 // the PDF file, a download link or a signed URL. Runs after `vite build`; failures never break the deploy.
 import { mkdirSync, writeFileSync } from 'node:fs';
 const URL_ = process.env.VITE_SUPABASE_URL, KEY = process.env.VITE_SUPABASE_ANON_KEY;
-const SITE = (process.env.SITE_URL || 'https://exampdfpro.github.io/ExamPDF-Pro/').replace(/\/?$/, '/');
+const SITE = (process.env.SITE_URL || 'https://exampdfpro.com/').replace(/\/?$/, '/');
 if (!URL_ || !KEY) { console.log('prerender: Supabase env missing - skipped'); process.exit(0); }
 const H = { apikey: KEY, authorization: `Bearer ${KEY}` };
 const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
