@@ -121,6 +121,7 @@ export const hiAdmin: Record<keyof typeof enAdmin, string> = {
   "ad.pm.paytm": "Paytm",
   "ad.pm.gpay": "Google Pay",
   "ad.pm.missing": "ऊपर जानकारी नहीं भरी, इसलिए कुछ नहीं दिखेगा",
+  "ad.pm.needupi": "पहले ऊपर अपनी UPI ID भरें। UPI ID के बिना UPI, PhonePe, Paytm और Google Pay बटन काम नहीं करते, इसलिए ग्राहक को नहीं दिखेंगे।",
   "ad.pay.save": "भुगतान विवरण सहेजें",
   "ad.pay.requests": "भुगतान अनुरोध",
   "ad.pay.shot": "स्क्रीनशॉट देखें",

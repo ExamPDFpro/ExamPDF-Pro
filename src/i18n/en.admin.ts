@@ -121,6 +121,7 @@ export const enAdmin = {
   "ad.pm.paytm": "Paytm",
   "ad.pm.gpay": "Google Pay",
   "ad.pm.missing": "Details not filled above, nothing will show",
+  "ad.pm.needupi": "Enter your UPI ID above first. Without it the UPI, PhonePe, Paytm and Google Pay buttons cannot work, so customers will not see them.",
   "ad.pay.save": "Save payment details",
   "ad.pay.requests": "Payment requests",
   "ad.pay.shot": "View screenshot",
