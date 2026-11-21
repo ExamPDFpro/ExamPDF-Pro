@@ -16,3 +16,6 @@ html[lang='bn'] .exam-hero-title, html[lang='hi'] .exam-hero-title { line-height
 .rv-track:hover,.rv-track.rv-hold{animation-play-state:paused}
 @keyframes rv-scroll{from{transform:translateX(0)}to{transform:translateX(calc(-50% - .5rem))}}
 @media (prefers-reduced-motion:reduce){.rv-marquee{overflow-x:auto;-webkit-mask-image:none;mask-image:none}.rv-track{animation:none}}
+
+/* Tablet fix: the 3D hero book is wider than the screen at 768-1024px and made the page scroll sideways. Clip it without creating a scroll area. */
+.exam-hero { overflow-x: clip; }

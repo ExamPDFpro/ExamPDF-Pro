@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { BookOpen, FileText, Headphones, Heart, Languages, Mail, Search, ShieldCheck, ShoppingCart, User, X } from "lucide-react";
 import { supabase, PRODUCT_COLS, pub, fnErr, type Product } from "./lib/supabase";
 import Preview from "./Preview";
@@ -8,17 +8,17 @@ import { loadSaved, storeSaved } from "./lib/savedForLater";
 import Hero3D from "./Hero3D";
 import { tilt, untilt } from "./lib/fx";
 import { Auth, Account } from "./Account";
-import Admin from "./Admin";
+const Admin = lazy(() => import("./Admin"));
 import { ReviewsSection, ReviewModal } from "./Reviews";
 import { DEFAULT_PAGES, DEFAULT_TEXTS } from "./lib/defaults";
 import { useT, useLang, setLang, LANGS, dyn, dynGroup, locItem, setOverrides, en, type Key, type Lang } from "./i18n";
 import SocialIcons from "./SocialIcons";
 import PdfPage from "./PdfPage";
-import AffiliateApply from "./AffiliateApply";
+const AffiliateApply = lazy(() => import("./AffiliateApply"));
 import { captureRef } from "./lib/affiliate";
-import AffiliateDashboard from "./AffiliateDashboard";
+const AffiliateDashboard = lazy(() => import("./AffiliateDashboard"));
 import CallWidget from "./CallWidget";
-import PasswordRecovery from "./PasswordRecovery";
+const PasswordRecovery = lazy(() => import("./PasswordRecovery"));
 import PushToggle from "./PushToggle";
 import NoticeBar from "./NoticeBar";
 import { loadCart, stampCart } from "./lib/cartExpiry";
@@ -33,8 +33,8 @@ const FONTS: Record<string, string> = { sans: "ui-sans-serif, system-ui, sans-se
 type Modal = { t: "preview" | "cart" | "checkout" | "auth" | "account" | "review" | "page" | "affiliate"; page?: any; p?: Product; existing?: { id: string; total: number } } | null;
 
 export default function App() {
-  if (window.location.hash === "#admin") return <Admin />;
-  if (window.location.hash === "#affiliate") return <AffiliateDashboard />;
+  if (window.location.hash === "#admin") return <Suspense fallback={null}><Admin /></Suspense>;
+  if (window.location.hash === "#affiliate") return <Suspense fallback={null}><AffiliateDashboard /></Suspense>;
   const [user, setUser] = useState<any>(null), [products, setProducts] = useState<Product[]>([]), [cats, setCats] = useState<any[]>([]);
   const [best, setBest] = useState<string[]>([]), [site, setSite] = useState<Record<string, any>>({}), [owned, setOwned] = useState<string[]>([]);
   const [cart, setCart] = useState<string[]>(() => loadCart()), [savedIds, setSavedIds] = useState<string[]>(() => loadSaved());
@@ -228,12 +228,12 @@ export default function App() {
         catName={(p) => { const c = displayCats.find((x) => x.id === p.category_id); return c ? cn(c) : t("card.cat"); }}
         onRemove={(id) => setCart(cart.filter((x) => x !== id))} onSave={saveLater} onRestore={restoreSaved} onRemoveSaved={(id) => setSavedIds((s) => s.filter((x) => x !== id))}
         onCheckout={() => setModal(user ? { t: "checkout" } : { t: "auth" })} onClose={() => setModal(null)} />}
-      {m?.t === "affiliate" && <AffiliateApply onClose={() => setModal(null)} say={say} />}
+      {m?.t === "affiliate" && <Suspense fallback={null}><AffiliateApply onClose={() => setModal(null)} say={say} /></Suspense>}
       {m?.t === "auth" && <Auth onClose={() => setModal(null)} onDone={() => setModal(m.p || cart.length ? { t: "checkout", p: m.p } : null)} />}
       {m?.t === "checkout" && user && <Checkout items={m.existing ? [] : m.p ? [m.p] : cartItems} existing={m.existing} user={user} say={say} onClose={() => setModal(null)} onOrders={() => setModal({ t: "account" })}
         onDone={() => { if (!m.p && !m.existing) setCart([]); }} />}
       {m?.t === "account" && user && <Account user={user} say={say} onClose={() => setModal(null)} onPay={(o) => setModal({ t: "checkout", existing: o })} />}
-      <PasswordRecovery />
+      <Suspense fallback={null}><PasswordRecovery /></Suspense>
       <CallWidget phone={site.contact?.phone} hide={!!modal} />
       {toast && <div className="fixed bottom-24 left-1/2 z-[95] -translate-x-1/2 w-max max-w-[92vw] rounded-2xl text-center text-sm bg-gold lg:bottom-4 px-4 py-2 font-semibold text-navy shadow-xl">{toast}</div>}
     </div>
