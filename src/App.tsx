@@ -7,6 +7,7 @@ import CartPage from "./CartPage";
 import { loadSaved, storeSaved } from "./lib/savedForLater";
 import Hero3D from "./Hero3D";
 import { tilt, untilt } from "./lib/fx";
+import BookCover from "./BookCover";
 import { Auth, Account } from "./Account";
 const Admin = lazy(() => import("./Admin"));
 import { ReviewsSection, ReviewModal } from "./Reviews";
@@ -124,11 +125,10 @@ export default function App() {
     const category = (() => { const c = displayCats.find((x) => x.id === p.category_id); return c ? cn(c) : t("card.cat"); })();
     const hue = [218, 258, 188, 28, 342, 46, 202, 278][Math.abs((p.title || "PDF").split("").reduce((a, c) => a + c.charCodeAt(0), 0)) % 8];
     return <button key={p.id} onClick={() => setModal({ t: "preview", p })} onPointerMove={tilt} onPointerLeave={untilt} className="card exam-card group overflow-hidden text-left transition-transform duration-150">
-      <div className="exam-cover relative aspect-[3/4] overflow-hidden" style={{ background: `linear-gradient(155deg,hsl(${hue} 70% 42%),hsl(${hue} 65% 15%))` }}>
-        {p.cover_url && <img src={p.cover_url} alt={p.title} loading="lazy" className="absolute inset-0 h-full w-full object-cover" />}
+      <div className="exam-cover bk-on relative aspect-[3/4] overflow-hidden" style={{ ["--bh" as any]: hue, background: `linear-gradient(155deg,hsl(${hue} 70% 42%),hsl(${hue} 65% 15%))` }}>
+        <BookCover title={p.title} category={category} hue={hue} url={p.cover_url} ready={t("card.ready")} />
         <span className="absolute right-2 top-2 z-[2] rounded-md bg-gold px-2 py-0.5 text-[10px] font-black text-navy">{t("card.pdf")}</span>
         {T.likes_enabled !== false && <span role="button" tabIndex={0} aria-label={t("card.love")} onClick={(e) => { e.stopPropagation(); toggleLike(p.id); }} onKeyDown={(e) => { if (e.key === "Enter") { e.stopPropagation(); toggleLike(p.id); } }} className="absolute right-2 top-9 z-[3] flex cursor-pointer items-center gap-1 rounded-full bg-black/45 px-2 py-1 text-[11px] font-bold text-white backdrop-blur"><Heart size={13} className={myLikes.includes(p.id) ? "fill-red-500 text-red-500" : "text-white"} />{likes[p.id] || 0}</span>}
-        {!p.cover_url && <div className="absolute inset-0 flex flex-col justify-end p-3 text-left"><span className="mb-1 text-[10px] font-bold uppercase tracking-wider text-white/80">{category}</span><b className="text-sm font-black leading-tight text-white sm:text-base">{p.title}</b><span className="mt-2 w-fit rounded-full border border-gold/80 px-2 py-0.5 text-[9px] font-bold tracking-wider text-gold">{t("card.ready")}</span></div>}
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/25 to-transparent" />
       </div>
       <div className="exam-meta"><h3 className="line-clamp-2 min-h-[38px] text-[13px] font-semibold leading-5 sm:text-sm">{p.title}</h3>

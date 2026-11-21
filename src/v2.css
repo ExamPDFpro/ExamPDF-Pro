@@ -19,3 +19,27 @@ html[lang='bn'] .exam-hero-title, html[lang='hi'] .exam-hero-title { line-height
 
 /* Tablet fix: the 3D hero book is wider than the screen at 768-1024px and made the page scroll sideways. Clip it without creating a scroll area. */
 .exam-hero { overflow-x: clip; }
+
+/* ---- 3D book mockup inside product cards (display only) ---- */
+.exam-cover.bk-on { background: radial-gradient(120% 90% at 50% 38%, hsl(var(--bh,218) 55% 30% / .55), hsl(var(--bh,218) 60% 10% / .15) 70%), rgb(255 255 255 / .03) !important; border: 1px solid rgb(255 255 255 / .1); border-radius: 14px; box-shadow: none; }
+.exam-cover.bk-on::before, .exam-cover.bk-on::after { display: none; }
+.bk-stage { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; perspective: 900px; padding: 7% 0 5%; pointer-events: none; }
+.bk { position: relative; width: 66%; aspect-ratio: 3 / 4.15; transform-style: preserve-3d; transform: rotateY(-24deg) rotateX(4deg); transition: transform .45s cubic-bezier(.3,.7,.2,1); }
+.exam-card:hover .bk { transform: rotateY(-12deg) rotateX(2deg) translateY(-3px); }
+.bk-front { position: absolute; inset: 0; border-radius: 2px 6px 6px 2px; overflow: hidden; transform: translateZ(9px); background: linear-gradient(155deg, hsl(var(--bh,218) 70% 44%), hsl(var(--bh,218) 65% 16%)); box-shadow: 0 0 0 1px rgb(0 0 0 / .25); }
+.bk-front img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.bk-hinge { position: absolute; top: 0; bottom: 0; left: 5.5%; width: 3px; background: linear-gradient(90deg, rgb(0 0 0 / .35), rgb(255 255 255 / .18)); }
+.bk-gloss { position: absolute; inset: 0; background: linear-gradient(115deg, rgb(255 255 255 / .22), transparent 38%, rgb(0 0 0 / .18)); }
+.bk-spine { position: absolute; top: 0; bottom: 0; left: 0; width: 18px; transform-origin: left center; transform: translateZ(9px) rotateY(-90deg); background: linear-gradient(90deg, hsl(var(--bh,218) 65% 14%), hsl(var(--bh,218) 60% 24%)); border-radius: 2px 0 0 2px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.bk-spine span { writing-mode: vertical-rl; transform: rotate(180deg); font-size: 7px; font-weight: 800; letter-spacing: .12em; color: rgb(var(--c-gold)); white-space: nowrap; opacity: .9; }
+.bk-pages { position: absolute; top: 2%; bottom: 2%; right: 0; width: 18px; transform-origin: right center; transform: translateZ(9px) rotateY(90deg); background: repeating-linear-gradient(90deg, #f4f1e8 0 1.5px, #d9d5c7 1.5px 2.5px); border-radius: 0 2px 2px 0; }
+.bk-shadow { position: absolute; left: 14%; right: 6%; bottom: 3.5%; height: 9%; background: radial-gradient(ellipse at center, rgb(0 0 0 / .55), transparent 70%); filter: blur(5px); transform: rotate(-2deg); }
+.bk-art { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: flex-end; padding: 12% 9% 8% 13%; text-align: left; }
+.bk-art::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 34%; background: linear-gradient(180deg, rgb(255 255 255 / .14), transparent); }
+.bk-cat { font-size: 9px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: rgb(255 255 255 / .8); margin-bottom: 4px; }
+.bk-title { font-size: clamp(11px, 3.6vw, 16px); font-weight: 900; line-height: 1.12; color: #fff; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; text-shadow: 0 1px 2px rgb(0 0 0 / .35); }
+.bk-line { display: block; width: 34%; height: 2px; background: rgb(var(--c-gold)); margin: 7px 0; }
+.bk-ready { width: fit-content; border: 1px solid rgb(var(--c-gold) / .8); border-radius: 99px; padding: 1px 6px; font-size: 7px; font-weight: 800; letter-spacing: .08em; color: rgb(var(--c-gold)); }
+.bk-brand { font-style: normal; margin-top: 8px; font-size: 7px; font-weight: 800; letter-spacing: .14em; color: rgb(255 255 255 / .55); text-transform: uppercase; }
+@media (max-width: 380px) { .bk { width: 70%; } .bk-spine, .bk-pages { width: 12px; } }
+@media (prefers-reduced-motion: reduce) { .bk, .exam-card:hover .bk { transition: none; } }
