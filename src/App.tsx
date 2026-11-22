@@ -7,6 +7,7 @@ import CartPage from "./CartPage";
 import { loadSaved, storeSaved } from "./lib/savedForLater";
 import Hero3D from "./Hero3D";
 import { tilt, untilt } from "./lib/fx";
+import BookCover from "./BookCover";
 import { Auth, Account } from "./Account";
 const Admin = lazy(() => import("./Admin"));
 import { ReviewsSection, ReviewModal } from "./Reviews";
@@ -124,11 +125,10 @@ export default function App() {
     const category = (() => { const c = displayCats.find((x) => x.id === p.category_id); return c ? cn(c) : t("card.cat"); })();
     const hue = [218, 258, 188, 28, 342, 46, 202, 278][Math.abs((p.title || "PDF").split("").reduce((a, c) => a + c.charCodeAt(0), 0)) % 8];
     return <button key={p.id} onClick={() => setModal({ t: "preview", p })} onPointerMove={tilt} onPointerLeave={untilt} className="card exam-card group overflow-hidden text-left transition-transform duration-150">
-      <div className="exam-cover relative aspect-[3/4] overflow-hidden" style={{ background: `linear-gradient(155deg,hsl(${hue} 70% 42%),hsl(${hue} 65% 15%))` }}>
-        {p.cover_url && <img src={p.cover_url} alt={p.title} loading="lazy" className="absolute inset-0 h-full w-full object-cover" />}
+      <div className="exam-cover bk-on relative aspect-[3/4] overflow-hidden" style={{ ["--bh" as any]: hue, background: `linear-gradient(155deg,hsl(${hue} 70% 42%),hsl(${hue} 65% 15%))` }}>
+        <BookCover title={p.title} category={category} hue={hue} url={p.cover_url} ready={t("card.ready")} />
         <span className="absolute right-2 top-2 z-[2] rounded-md bg-gold px-2 py-0.5 text-[10px] font-black text-navy">{t("card.pdf")}</span>
         {T.likes_enabled !== false && <span role="button" tabIndex={0} aria-label={t("card.love")} onClick={(e) => { e.stopPropagation(); toggleLike(p.id); }} onKeyDown={(e) => { if (e.key === "Enter") { e.stopPropagation(); toggleLike(p.id); } }} className="absolute right-2 top-9 z-[3] flex cursor-pointer items-center gap-1 rounded-full bg-black/45 px-2 py-1 text-[11px] font-bold text-white backdrop-blur"><Heart size={13} className={myLikes.includes(p.id) ? "fill-red-500 text-red-500" : "text-white"} />{likes[p.id] || 0}</span>}
-        {!p.cover_url && <div className="absolute inset-0 flex flex-col justify-end p-3 text-left"><span className="mb-1 text-[10px] font-bold uppercase tracking-wider text-white/80">{category}</span><b className="text-sm font-black leading-tight text-white sm:text-base">{p.title}</b><span className="mt-2 w-fit rounded-full border border-gold/80 px-2 py-0.5 text-[9px] font-bold tracking-wider text-gold">{t("card.ready")}</span></div>}
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/25 to-transparent" />
       </div>
       <div className="exam-meta"><h3 className="line-clamp-2 min-h-[38px] text-[13px] font-semibold leading-5 sm:text-sm">{p.title}</h3>
@@ -182,9 +182,14 @@ export default function App() {
       {!T.reviews_hidden && !filtering && !routeSlug && <ReviewsSection T={T} reviews={reviews} products={prods} onWrite={() => (user ? setModal({ t: "review" }) : setModal({ t: "auth" }))} />}
       <footer className="site-footer mt-10 border-t border-gold/30 px-4 pt-8 text-sm text-white/60 max-md:pb-14">
         {(() => {
-          const go = (c: string | null) => { if (routeSlug) { history.replaceState(null, "", location.pathname + location.search); location.reload(); return; } setCat(c); document.getElementById("secs")?.scrollIntoView({ behavior: "smooth" }); };
+          const go = (c: string | null, query?: string) => { if (routeSlug) { history.replaceState(null, "", location.pathname + location.search); location.reload(); return; } setCat(c); if (query !== undefined) setQ(query); document.getElementById("secs")?.scrollIntoView({ behavior: "smooth" }); };
           const cl = "block py-1 text-left hover:text-gold";
-          const footCats = [0, 1, 2, 3, 4, 6].map((i) => coreCats[i]).filter(Boolean);
+          // Footer list is pinned to the original six links (UPSC, SSC, Railway, Banking, NEET, WBCS), independent of the chip order.
+          const footPick = (re: RegExp) => cats.find((c) => re.test(String(c.name || "")));
+          const footCats: any[] = [
+            footPick(/^upsc$/i) || DEFAULT_CATS[0], footPick(/^ssc/i) || DEFAULT_CATS[1], footPick(/^railway/i) || DEFAULT_CATS[2],
+            footPick(/^banking/i) || DEFAULT_CATS[3], footPick(/^neet$/i) || { ...DEFAULT_CATS[4], search: "NEET" }, footPick(/^wbcs$/i) || DEFAULT_CATS[6],
+          ];
           const pages = (site.pages?.items ?? DEFAULT_PAGES).filter((x: any) => x.show !== false);
           const pk = (id: string) => (("page." + id) in en ? ("page." + id) : undefined) as Key | undefined;
           const PageLinks = ({ g }: { g: string }) => <>{pages.filter((x: any) => x.group === g).map((x: any) => /^https?:\/\//.test(x.url || "")
@@ -202,7 +207,7 @@ export default function App() {
               <button className={cl} onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>{t("common.home")}</button>
               <button className={cl} onClick={() => go(null)}>{t("foot.allpdfs")}</button><button className={cl} onClick={() => go(null)}>{t("foot.popular")}</button><PageLinks g="quick" />
               <button className={cl} onClick={() => setModal({ t: "affiliate" })}>{t("foot.affiliate")}</button><button className={cl} onClick={() => { window.location.hash = "affiliate"; window.location.reload(); }}>{t("foot.affdash")}</button><PushToggle cl={cl} say={say} /></div>
-            <div><p className="mb-2 font-bold text-gold">{dyn("foot.cats", F.cats_title || en["foot.cats"], "foot.cats")}</p>{footCats.map((c: any) => <button key={c.id} className={cl} onClick={() => go(c.id)}>{cn(c).replace(/ CGL| IBPS/g, "")}</button>)}</div>
+            <div><p className="mb-2 font-bold text-gold">{dyn("foot.cats", F.cats_title || en["foot.cats"], "foot.cats")}</p>{footCats.map((c: any) => <button key={c.id} className={cl} onClick={() => (c.search ? go(null, c.search) : go(c.id))}>{String(c.name).replace(/ CGL| IBPS|\s*\(All India\)/g, "")}</button>)}</div>
             <div><p className="mb-2 font-bold text-gold">{dyn("foot.support", F.support_title || en["foot.support"], "foot.support")}</p>
               {site.contact?.email ? <a className={cl} href={`mailto:${site.contact.email}`}><Mail className="mr-2 inline h-4 w-4" />{t("foot.contact")}</a> : <span className={cl}><Mail className="mr-2 inline h-4 w-4" />{t("foot.contact")}</span>}
               <PageLinks g="support" />
