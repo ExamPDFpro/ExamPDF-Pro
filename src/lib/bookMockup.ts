@@ -188,4 +188,7 @@ export async function toWebp(src: Blob, maxSide = 1400, q = 0.9): Promise<Blob> 
 export const is3d = (u?: string | null) => !!u && /-3d\.webp(\?|$)/.test(u);
 // Regenerated mockups keep the same base name plus "-v<time>" so the original (<base>-orig.webp) stays reachable.
 export const origOf = (u: string) => u.replace(/(-v\d+)?-3d\.webp(\?|$)/, "-orig.webp$2");
-export const stemOf = (u: string) => decodeURIComponent((u.split("/covers/")[1] || "").split("?")[0]).replace(/(-v\d+)?-3d\.webp$/, "");
+// Stored original cover (<base>-orig.webp). Restoring it makes this the current cover, so history must keep working from it too.
+export const isOrig = (u?: string | null) => !!u && /-orig\.webp(\?|$)/.test(u);
+// <base> shared by every version of one product's cover: <base>-3d.webp, <base>-v<time>-3d.webp, <base>-orig.webp.
+export const stemOf = (u: string) => decodeURIComponent((u.split("/covers/")[1] || "").split("?")[0]).replace(/(-v\d+)?-3d\.webp$|-orig\.webp$/, "");

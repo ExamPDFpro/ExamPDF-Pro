@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { renderMockup, loadImage, toWebp, is3d, origOf } from "./lib/bookMockup";
+import AdminCoverHistory from "./AdminCoverHistory";
 
 // Result handed to the product form; saveProduct uploads it to the existing `covers` bucket.
 export type Mock3D = { mock: Blob; orig: Blob | null } | { restoreUrl: string } | { flat: true } | null;
@@ -64,6 +65,13 @@ export default function Admin3D({ title, category, coverFile, coverUrl, isNew, o
           </div>
         </div>
       )}
+      {!on && rest && (
+        <div className="mt-3 flex flex-wrap items-center gap-3">
+          <div className="flex h-[200px] w-[150px] items-center justify-center rounded-lg border border-gold/50 bg-black/20"><img src={rest} alt="Restored cover preview" className="h-full w-full object-contain" /></div>
+          <p className="max-w-[260px] text-[11px] leading-relaxed text-white/60">এই আগের কভারটি ফেরানো হবে। Save চাপলে সংশ্লিষ্ট PDF কার্ডে এটি দেখাবে। বাতিল করতে উপরের "3D Book Mockup" বক্স আবার টিক দিন।</p>
+        </div>
+      )}
+      <AdminCoverHistory coverUrl={coverUrl} pickedUrl={!on ? rest : ""} onPick={(u) => { setCustom(null); setMsg(""); setRest(u); setOn(false); }} />
     </div>
   );
 }
