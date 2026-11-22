@@ -1,0 +1,99 @@
+{
+ "taken_at": "2026-11-22T02:46:57Z",
+ "note": "state before 016_wb_exam_categories.sql",
+ "exam_categories": [
+  {
+   "id": "6f811d6c-6eb3-4158-8fbc-bdbb7e802fe0",
+   "name": "UPSC",
+   "sort_order": 1
+  },
+  {
+   "id": "fc5258c0-1495-491d-acb2-e6a335623c56",
+   "name": "SSC CGL",
+   "sort_order": 2
+  },
+  {
+   "id": "225a4273-dc05-4d50-be63-c4cdca398dc3",
+   "name": "Railway",
+   "sort_order": 3
+  },
+  {
+   "id": "3be9bffd-d0cc-4737-80d0-09526cc2fbb2",
+   "name": "Banking IBPS",
+   "sort_order": 4
+  },
+  {
+   "id": "84ea8c13-1c1f-4cfb-a4c7-c0d1a17163cf",
+   "name": "NEET",
+   "sort_order": 5
+  },
+  {
+   "id": "22ade8c1-0aae-4b86-9529-ff1c0a39f71a",
+   "name": "CTET",
+   "sort_order": 6
+  },
+  {
+   "id": "eaf8d110-7673-4cf0-9eee-1d4a21ea2a86",
+   "name": "WBCS",
+   "sort_order": 7
+  },
+  {
+   "id": "57aaea47-3eaf-4616-b020-8c2bb1e9657d",
+   "name": "ICDS Supervisor",
+   "sort_order": 8
+  },
+  {
+   "id": "876cce6f-8fd9-4d99-9d6d-aa7cc237d192",
+   "name": "WB Police",
+   "sort_order": 8
+  }
+ ],
+ "pdf_products_category": [
+  {
+   "id": "6751c15b-123b-4a5f-a9eb-854960dd7f6c",
+   "title": "CTET Child Pedagogy Notes",
+   "category_id": "22ade8c1-0aae-4b86-9529-ff1c0a39f71a"
+  },
+  {
+   "id": "706f0784-0de9-45fe-8c82-f5aadd1082ec",
+   "title": "NEET Biology Quick Revision",
+   "category_id": "84ea8c13-1c1f-4cfb-a4c7-c0d1a17163cf"
+  },
+  {
+   "id": "51a98c86-7281-422b-9d57-c769531bc45d",
+   "title": "IBPS Clerk Reasoning Pack",
+   "category_id": "3be9bffd-d0cc-4737-80d0-09526cc2fbb2"
+  },
+  {
+   "id": "2d211f3d-8980-4f5c-879e-4f516d755bad",
+   "title": "RRB NTPC Previous Papers",
+   "category_id": "225a4273-dc05-4d50-be63-c4cdca398dc3"
+  },
+  {
+   "id": "8c25bcf6-e96d-4ade-aa51-e347cc5c448b",
+   "title": "WB Police Constable Guide",
+   "category_id": "876cce6f-8fd9-4d99-9d6d-aa7cc237d192"
+  },
+  {
+   "id": "6e3a0b7b-93ce-4a2c-96a1-525d768d4a14",
+   "title": "WBCS Prelims Practice Sets",
+   "category_id": "eaf8d110-7673-4cf0-9eee-1d4a21ea2a86"
+  },
+  {
+   "id": "3df098f8-1b2d-487a-973a-cc2c516df550",
+   "title": "SSC CGL Maths Shortcuts",
+   "category_id": "fc5258c0-1495-491d-acb2-e6a335623c56"
+  },
+  {
+   "id": "d860662f-b39b-400b-b76f-97dd560b96d3",
+   "title": "UPSC Prelims GS Notes 2026",
+   "category_id": "6f811d6c-6eb3-4158-8fbc-bdbb7e802fe0"
+  },
+  {
+   "id": "d5c4cf8e-1ec7-43b7-9674-5524e9b75bb4",
+   "title": "ICDS_Supervisor",
+   "category_id": "57aaea47-3eaf-4616-b020-8c2bb1e9657d"
+  }
+ ],
+ "website_settings_i18n": null
+}
