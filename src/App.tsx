@@ -182,9 +182,14 @@ export default function App() {
       {!T.reviews_hidden && !filtering && !routeSlug && <ReviewsSection T={T} reviews={reviews} products={prods} onWrite={() => (user ? setModal({ t: "review" }) : setModal({ t: "auth" }))} />}
       <footer className="site-footer mt-10 border-t border-gold/30 px-4 pt-8 text-sm text-white/60 max-md:pb-14">
         {(() => {
-          const go = (c: string | null) => { if (routeSlug) { history.replaceState(null, "", location.pathname + location.search); location.reload(); return; } setCat(c); document.getElementById("secs")?.scrollIntoView({ behavior: "smooth" }); };
+          const go = (c: string | null, query?: string) => { if (routeSlug) { history.replaceState(null, "", location.pathname + location.search); location.reload(); return; } setCat(c); if (query !== undefined) setQ(query); document.getElementById("secs")?.scrollIntoView({ behavior: "smooth" }); };
           const cl = "block py-1 text-left hover:text-gold";
-          const footCats = [0, 1, 2, 3, 4, 6].map((i) => coreCats[i]).filter(Boolean);
+          // Footer list is pinned to the original six links (UPSC, SSC, Railway, Banking, NEET, WBCS), independent of the chip order.
+          const footPick = (re: RegExp) => cats.find((c) => re.test(String(c.name || "")));
+          const footCats: any[] = [
+            footPick(/^upsc$/i) || DEFAULT_CATS[0], footPick(/^ssc/i) || DEFAULT_CATS[1], footPick(/^railway/i) || DEFAULT_CATS[2],
+            footPick(/^banking/i) || DEFAULT_CATS[3], footPick(/^neet$/i) || { ...DEFAULT_CATS[4], search: "NEET" }, footPick(/^wbcs$/i) || DEFAULT_CATS[6],
+          ];
           const pages = (site.pages?.items ?? DEFAULT_PAGES).filter((x: any) => x.show !== false);
           const pk = (id: string) => (("page." + id) in en ? ("page." + id) : undefined) as Key | undefined;
           const PageLinks = ({ g }: { g: string }) => <>{pages.filter((x: any) => x.group === g).map((x: any) => /^https?:\/\//.test(x.url || "")
@@ -202,7 +207,7 @@ export default function App() {
               <button className={cl} onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>{t("common.home")}</button>
               <button className={cl} onClick={() => go(null)}>{t("foot.allpdfs")}</button><button className={cl} onClick={() => go(null)}>{t("foot.popular")}</button><PageLinks g="quick" />
               <button className={cl} onClick={() => setModal({ t: "affiliate" })}>{t("foot.affiliate")}</button><button className={cl} onClick={() => { window.location.hash = "affiliate"; window.location.reload(); }}>{t("foot.affdash")}</button><PushToggle cl={cl} say={say} /></div>
-            <div><p className="mb-2 font-bold text-gold">{dyn("foot.cats", F.cats_title || en["foot.cats"], "foot.cats")}</p>{footCats.map((c: any) => <button key={c.id} className={cl} onClick={() => go(c.id)}>{cn(c).replace(/ CGL| IBPS/g, "")}</button>)}</div>
+            <div><p className="mb-2 font-bold text-gold">{dyn("foot.cats", F.cats_title || en["foot.cats"], "foot.cats")}</p>{footCats.map((c: any) => <button key={c.id} className={cl} onClick={() => (c.search ? go(null, c.search) : go(c.id))}>{String(c.name).replace(/ CGL| IBPS|\s*\(All India\)/g, "")}</button>)}</div>
             <div><p className="mb-2 font-bold text-gold">{dyn("foot.support", F.support_title || en["foot.support"], "foot.support")}</p>
               {site.contact?.email ? <a className={cl} href={`mailto:${site.contact.email}`}><Mail className="mr-2 inline h-4 w-4" />{t("foot.contact")}</a> : <span className={cl}><Mail className="mr-2 inline h-4 w-4" />{t("foot.contact")}</span>}
               <PageLinks g="support" />
