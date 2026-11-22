@@ -22,7 +22,7 @@ export default function Admin3D({ title, category, coverFile, coverUrl, isNew, o
       setBusy(true); setMsg("");
       try {
         let mock: Blob, orig: Blob | null = null;
-        if (custom) { mock = await toWebp(custom, 1400); }
+        if (custom) { mock = await toWebp(custom, 1400); if (!had3d && coverUrl) { try { const r = await fetch(coverUrl); orig = await toWebp(await r.blob(), 1400); } catch { orig = null; } } }
         else {
           let src: Blob | string | null = coverFile;
           if (!src && coverUrl) src = had3d ? origOf(coverUrl) : coverUrl;

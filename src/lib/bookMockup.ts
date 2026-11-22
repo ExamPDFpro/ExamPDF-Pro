@@ -186,4 +186,6 @@ export async function toWebp(src: Blob, maxSide = 1400, q = 0.9): Promise<Blob> 
 
 // Naming convention (no DB column needed): <base>-3d.webp is the mockup, <base>-orig.webp is the original cover.
 export const is3d = (u?: string | null) => !!u && /-3d\.webp(\?|$)/.test(u);
-export const origOf = (u: string) => u.replace(/-3d\.webp(\?|$)/, "-orig.webp$1");
+// Regenerated mockups keep the same base name plus "-v<time>" so the original (<base>-orig.webp) stays reachable.
+export const origOf = (u: string) => u.replace(/(-v\d+)?-3d\.webp(\?|$)/, "-orig.webp$2");
+export const stemOf = (u: string) => decodeURIComponent((u.split("/covers/")[1] || "").split("?")[0]).replace(/(-v\d+)?-3d\.webp$/, "");

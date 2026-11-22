@@ -1,4 +1,5 @@
 import Admin3D, { type Mock3D } from './Admin3D';
+import { is3d, stemOf } from './lib/bookMockup';
 import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from 'react';
 import { supabase, isSupabaseConfigured, PRODUCT_COLS, type Product } from './lib/supabase';
 import AdminPayments from './AdminPayments';
@@ -65,7 +66,7 @@ export default function Admin(){
  setSaving(true);try{
   let cover=form.cover_url,preview=form.preview_pdf_path,securePath=form.secure_path;
   const m3=mock3d&&'mock' in mock3d?mock3d:null;
-  if(m3){const base=`${Date.now()}-${safeName(form.title||'pdf')}`.slice(0,80);const up3=async(n:string,b:Blob)=>{const {error}=await supabase.storage.from('covers').upload(n,b,{upsert:false,contentType:'image/webp'});if(error)throw error;return supabase.storage.from('covers').getPublicUrl(n).data.publicUrl;};if(m3.orig)await up3(`${base}-orig.webp`,m3.orig);cover=await up3(`${base}-3d.webp`,m3.mock);}
+  if(m3){const stem=is3d(form.cover_url)?stemOf(form.cover_url):'';const base=stem?`${stem}-v${Date.now()}`:`${Date.now()}-${safeName(form.title||'pdf')}`.slice(0,80);const up3=async(n:string,b:Blob)=>{const {error}=await supabase.storage.from('covers').upload(n,b,{upsert:false,contentType:'image/webp'});if(error)throw error;return supabase.storage.from('covers').getPublicUrl(n).data.publicUrl;};if(m3.orig&&!stem)await up3(`${base}-orig.webp`,m3.orig);cover=await up3(`${base}-3d.webp`,m3.mock);}
   else if(mock3d&&'restoreUrl' in mock3d){cover=mock3d.restoreUrl;}
   else if(coverFile){const path=await upload('covers',coverFile);cover=supabase.storage.from('covers').getPublicUrl(path).data.publicUrl;}
   if(previewFile)preview=await upload('pdf-previews',previewFile);
