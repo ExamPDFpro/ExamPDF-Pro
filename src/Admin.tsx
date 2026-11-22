@@ -1,3 +1,4 @@
+import Admin3D, { type Mock3D } from './Admin3D';
 import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from 'react';
 import { supabase, isSupabaseConfigured, PRODUCT_COLS, type Product } from './lib/supabase';
 import AdminPayments from './AdminPayments';
@@ -39,7 +40,7 @@ export default function Admin(){
  const t=useT(),lang=useLang(),[needMfa,setNeedMfa]=useState(false);
  const [user,setUser]=useState<any>(null),[role,setRole]=useState(''),[message,setMessage]=useState(()=>t('ad.checking')),[tab,setTab]=useState<string>('overview');
  const [products,setProducts]=useState<Product[]>([]),[cats,setCats]=useState<Category[]>([]),[settings,setSettings]=useState<any>(defaults),[secure,setSecure]=useState<Record<string,string>>({});
- const [form,setForm]=useState<ProductForm>(emptyProduct),[coverFile,setCoverFile]=useState<File|null>(null),[previewFile,setPreviewFile]=useState<File|null>(null),[pvMsg,setPvMsg]=useState<{ok:boolean;text:string}|null>(null),[fullFile,setFullFile]=useState<File|null>(null),[saving,setSaving]=useState(false),[notice,setNotice]=useState('');
+ const [form,setForm]=useState<ProductForm>(emptyProduct),[coverFile,setCoverFile]=useState<File|null>(null),[previewFile,setPreviewFile]=useState<File|null>(null),[pvMsg,setPvMsg]=useState<{ok:boolean;text:string}|null>(null),[fullFile,setFullFile]=useState<File|null>(null),[mock3d,setMock3d]=useState<Mock3D>(null),[saving,setSaving]=useState(false),[notice,setNotice]=useState('');
  const [newCat,setNewCat]=useState(''),[search,setSearch]=useState('');
  const say=(s:string)=>{setNotice(s);window.setTimeout(()=>setNotice(''),3500)};
  const load=async()=>{
@@ -63,7 +64,10 @@ export default function Admin(){
  const saveProduct=async(e:FormEvent)=>{e.preventDefault();if(!form.title.trim()){say('PDF-এর নাম লিখুন।');return;}if(!form.id&&!fullFile){say('নতুন PDF-এর Full PDF ফাইলটি আপলোড করুন।');return;}if(previewFile&&pvMsg?.ok!==true){say(t('ad.pv.notverified'));return;}if(previewFile&&(previewFile.size>=3*1048576||(fullFile&&previewFile.size>=fullFile.size*0.5))&&!confirm(t('ad.sec.bigpreview')))return;
  setSaving(true);try{
   let cover=form.cover_url,preview=form.preview_pdf_path,securePath=form.secure_path;
-  if(coverFile){const path=await upload('covers',coverFile);cover=supabase.storage.from('covers').getPublicUrl(path).data.publicUrl;}
+  const m3=mock3d&&'mock' in mock3d?mock3d:null;
+  if(m3){const base=`${Date.now()}-${safeName(form.title||'pdf')}`.slice(0,80);const up3=async(n:string,b:Blob)=>{const {error}=await supabase.storage.from('covers').upload(n,b,{upsert:false,contentType:'image/webp'});if(error)throw error;return supabase.storage.from('covers').getPublicUrl(n).data.publicUrl;};if(m3.orig)await up3(`${base}-orig.webp`,m3.orig);cover=await up3(`${base}-3d.webp`,m3.mock);}
+  else if(mock3d&&'restoreUrl' in mock3d){cover=mock3d.restoreUrl;}
+  else if(coverFile){const path=await upload('covers',coverFile);cover=supabase.storage.from('covers').getPublicUrl(path).data.publicUrl;}
   if(previewFile)preview=await upload('pdf-previews',previewFile);
   if(fullFile)securePath=await upload('paid-pdfs',fullFile);
   const payload={title:form.title.trim(),description:form.description,title_bn:form.title_bn.trim()||null,title_hi:form.title_hi.trim()||null,description_bn:form.description_bn.trim()||null,description_hi:form.description_hi.trim()||null,discount_pct:Number(form.discount_pct||0),category_id:form.category_id||null,selling_price:Number(form.selling_price||0),original_price:Number(form.original_price||0),cover_url:cover||null,preview_enabled:form.preview_enabled,preview_pdf_path:preview||null,is_featured:form.is_featured,featured_order:Number(form.featured_order||0),is_active:form.is_active,is_published:form.is_published};
@@ -71,7 +75,7 @@ export default function Admin(){
   if(id){const {error}=await supabase.from('pdf_products').update(payload).eq('id',id);if(error)throw error;}
   else {const {data,error}=await supabase.from('pdf_products').insert(payload).select('id').single();if(error)throw error;id=data.id;}
   if(securePath&&id){const {error}=await supabase.from('pdf_secure_files').upsert({product_id:id,storage_path:securePath},{onConflict:'product_id'});if(error)throw error;}
-  setForm(emptyProduct);setCoverFile(null);setPreviewFile(null);setPvMsg(null);setFullFile(null);await load();say('PDF সংরক্ষণ হয়েছে ✓');
+  setForm(emptyProduct);setCoverFile(null);setMock3d(null);setPreviewFile(null);setPvMsg(null);setFullFile(null);await load();say('PDF সংরক্ষণ হয়েছে ✓');
  }catch(err:any){say('সেভ করা যায়নি: '+(err.message||'Unknown error'));}finally{setSaving(false);}};
  const deleteProduct=async(id:string)=>{if(!confirm('এই PDF-টি মুছে ফেলবেন?'))return;const {error}=await supabase.from('pdf_products').delete().eq('id',id);if(error)say(error.message);else{await load();say('PDF মুছে ফেলা হয়েছে।');}};
  const addCategory=async(e:FormEvent)=>{e.preventDefault();if(!newCat.trim())return;const {error}=await supabase.from('exam_categories').insert({name:newCat.trim(),sort_order:cats.length});if(error)say(error.message);else{setNewCat('');await load();say('Category যোগ হয়েছে ✓');}};
@@ -101,6 +105,7 @@ export default function Admin(){
      <label className="sm:col-span-2"><span className={label}>{t('ad.pf.desc_bn')}</span><textarea className={input} rows={2} value={form.description_bn} onChange={e=>setForm({...form,description_bn:e.target.value})}/></label>
      <label className="sm:col-span-2"><span className={label}>{t('ad.pf.desc_hi')}</span><textarea className={input} rows={2} value={form.description_hi} onChange={e=>setForm({...form,description_hi:e.target.value})}/></label>
      <label><span className={label}>Cover Image Upload</span><input className={input} type="file" accept="image/*" onChange={e=>setCoverFile(e.target.files?.[0]||null)}/><span className="mt-1 block text-[10px] text-white/40">না দিলে Gradient PDF Cover দেখাবে।</span></label>
+     <Admin3D key={form.id||'new'} isNew={!form.id} title={form.title} category={cats.find(c=>c.id===form.category_id)?.name||''} coverFile={coverFile} coverUrl={form.cover_url} onChange={setMock3d}/>
      <label><span className={label}>Full PDF Upload * {form.id?'(নতুন ফাইল দিলে replace হবে)':''}</span><input className={input} type="file" accept="application/pdf,.pdf" onChange={e=>setFullFile(e.target.files?.[0]||null)}/><span className="mt-1 block text-[10px] text-white/40">Private paid-pdfs bucket-এ আপলোড হবে।</span></label>
      <label><span className={label}>২-পৃষ্ঠার Preview PDF Upload</span><input className={input} type="file" accept="application/pdf,.pdf" onChange={async e=>{const inp=e.target,f=inp.files?.[0]||null;setPreviewFile(null);setPvMsg(null);if(!f)return;setPvMsg({ok:false,text:t('ad.pv.checking')});try{const n=await countPdfPages(f);if(n===2){setPreviewFile(f);setPvMsg({ok:true,text:t('ad.pv.ok')});}else{inp.value='';setPvMsg({ok:false,text:t(n<2?'ad.pv.fewer':'ad.pv.more',{n})});}}catch{inp.value='';setPvMsg({ok:false,text:t('ad.pv.unreadable')});}}}/>{pvMsg?<span className={`mt-1 block text-xs font-semibold ${pvMsg.ok?'text-green-400':'text-red-400'}`}>{pvMsg.text}</span>:<span className="mt-1 block text-xs text-white/45">{t('ad.pv.rule')}</span>}</label>
      <label><span className={label}>Featured Order</span><input className={input} type="number" value={form.featured_order} onChange={e=>setForm({...form,featured_order:e.target.value})}/></label>
