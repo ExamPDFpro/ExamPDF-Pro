@@ -24,6 +24,7 @@ import PushToggle from "./PushToggle";
 import NoticeBar from "./NoticeBar";
 import { loadCart, stampCart } from "./lib/cartExpiry";
 import { pdfRouteSlug } from "./lib/share";
+import { HowItWorks, FaqSection } from "./HomeExtras";
 
 const DEFAULT_CATS = [
   { id: "upsc", name: "UPSC" }, { id: "ssc", name: "SSC CGL" }, { id: "railway", name: "Railway" },
@@ -179,6 +180,8 @@ export default function App() {
         {products.length === 0 && loaded && <p className="py-10 text-center text-white/60">{t("sec.empty")}</p>}</>}
       </>}
 
+      {!T.how_hidden && !filtering && !routeSlug && <HowItWorks />}
+      {!T.faq_hidden && !filtering && !routeSlug && <FaqSection />}
       {!T.reviews_hidden && !filtering && !routeSlug && <ReviewsSection T={T} reviews={reviews} products={prods} onWrite={() => (user ? setModal({ t: "review" }) : setModal({ t: "auth" }))} />}
       <footer className="site-footer mt-10 border-t border-gold/30 px-4 pt-8 text-sm text-white/60 max-md:pb-14">
         {(() => {
